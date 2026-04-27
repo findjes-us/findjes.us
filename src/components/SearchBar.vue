@@ -2,7 +2,12 @@
   <div class="relative w-full">
     <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500">
       <IconSearch class="w-5 h-5 text-gray-400 flex-shrink-0" />
+      <label
+        for="passage-search"
+        class="sr-only"
+      >Search passages</label>
       <input
+        id="passage-search"
         v-model="localQuery"
         type="text"
         placeholder="Search passages… (supports *, ?, #, [a-z], [!abc])"

@@ -48,7 +48,7 @@ npm run lint
 
 ## Contributing
 
-Pull requests are welcome! See [CONTRIBUTING](https://github.com/findjes-us/findjes.us) for details.
+Pull requests are welcome! Visit the [repository](https://github.com/findjes-us/findjes.us) for project details and to contribute.
 All content comes from the World English Bible, which is in the public domain.
 
 <!-- original readme content below -->

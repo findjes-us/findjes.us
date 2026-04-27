@@ -24,8 +24,8 @@
       </p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <PassageCard
-          v-for="(p, i) in visiblePassages"
-          :key="i"
+          v-for="p in visiblePassages"
+          :key="`${p.book}-${p.chapter}-${p.verse}`"
           :passage="p"
         />
       </div>

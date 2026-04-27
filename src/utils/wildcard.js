@@ -28,7 +28,7 @@ export function wildcardToRegex(pattern) {
       i = end + 1
       continue
     } else {
-      regex += ch.replace(/[.+^${}()|\\]/g, '\\$&')
+      regex += ch.replace(/[.+^${}()|\\[\]]/g, '\\$&')
     }
     i++
   }
@@ -41,7 +41,7 @@ export function wildcardToRegex(pattern) {
  */
 export function matchesWildcard(text, pattern) {
   if (!pattern) return true
-  const hasWildcard = /[*?#[\]]/.test(pattern)
+  const hasWildcard = /[*?#\[]/.test(pattern)
   if (!hasWildcard) {
     return text.toLowerCase().includes(pattern.toLowerCase())
   }

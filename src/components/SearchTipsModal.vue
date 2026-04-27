@@ -35,7 +35,7 @@
 <script setup>
 import { IconX, IconHelp } from '@tabler/icons-vue'
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const tips = [
   { symbol: '*', description: 'Matches any sequence of characters (zero or more).', example: 'king*dom' },

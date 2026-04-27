@@ -1,8 +1,16 @@
 <template>
   <div class="flex flex-wrap gap-3 items-center">
     <div class="flex items-center gap-1">
-      <IconBook class="w-4 h-4 text-indigo-500" />
+      <IconBook
+        class="w-4 h-4 text-indigo-500"
+        aria-hidden="true"
+      />
+      <label
+        for="filter-book"
+        class="sr-only"
+      >Book</label>
       <select
+        id="filter-book"
         :value="book"
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
         @change="emit('update:book', $event.target.value); emit('update:chapter', ''); emit('update:verse', '')"
@@ -21,8 +29,16 @@
     </div>
 
     <div class="flex items-center gap-1">
-      <IconBookmark class="w-4 h-4 text-indigo-500" />
+      <IconBookmark
+        class="w-4 h-4 text-indigo-500"
+        aria-hidden="true"
+      />
+      <label
+        for="filter-chapter"
+        class="sr-only"
+      >Chapter</label>
       <select
+        id="filter-chapter"
         :value="chapter"
         :disabled="!book"
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
@@ -42,8 +58,16 @@
     </div>
 
     <div class="flex items-center gap-1">
-      <IconHash class="w-4 h-4 text-indigo-500" />
+      <IconHash
+        class="w-4 h-4 text-indigo-500"
+        aria-hidden="true"
+      />
+      <label
+        for="filter-verse"
+        class="sr-only"
+      >Verse</label>
       <select
+        id="filter-verse"
         :value="verse"
         :disabled="!chapter"
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
