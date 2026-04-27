@@ -8,7 +8,9 @@
         {{ passage.chapter }}:{{ passage.verse }}
       </span>
     </header>
-    <p class="text-sm text-gray-800 leading-relaxed">{{ passage.text }}</p>
+    <p class="text-sm text-gray-800 leading-relaxed">
+      {{ passage.text }}
+    </p>
   </article>
 </template>
 

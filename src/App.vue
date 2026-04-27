@@ -34,13 +34,19 @@
     <!-- Main content -->
     <main class="max-w-6xl mx-auto px-4 py-6">
       <!-- Loading state -->
-      <div v-if="loading" class="flex items-center justify-center py-24 text-gray-500">
+      <div
+        v-if="loading"
+        class="flex items-center justify-center py-24 text-gray-500"
+      >
         <IconLoader class="w-8 h-8 animate-spin mr-3" />
         Loading passages…
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="text-center py-24 text-red-600">
+      <div
+        v-else-if="error"
+        class="text-center py-24 text-red-600"
+      >
         <IconAlertCircle class="w-8 h-8 mx-auto mb-2" />
         <p>{{ error }}</p>
       </div>
@@ -51,7 +57,10 @@
       <!-- Home page -->
       <template v-else>
         <div class="space-y-4">
-          <SearchBar v-model="searchQuery" @search="searchQuery = $event" />
+          <SearchBar
+            v-model="searchQuery"
+            @search="searchQuery = $event"
+          />
           <FilterBar
             v-model:book="filterBook"
             v-model:chapter="filterChapter"
@@ -69,14 +78,27 @@
     </main>
 
     <!-- Search Tips Modal -->
-    <SearchTipsModal v-if="showTips" @close="showTips = false" />
+    <SearchTipsModal
+      v-if="showTips"
+      @close="showTips = false"
+    />
 
     <!-- Footer -->
     <footer class="mt-12 border-t border-gray-200 py-6 text-center text-xs text-gray-400">
       Scripture from the
-      <a href="https://worldenglish.bible" target="_blank" rel="noopener" class="underline hover:text-gray-600">World English Bible</a>
+      <a
+        href="https://worldenglish.bible"
+        target="_blank"
+        rel="noopener"
+        class="underline hover:text-gray-600"
+      >World English Bible</a>
       (Public Domain) ·
-      <a href="https://github.com/findjes-us/findjes.us" target="_blank" rel="noopener" class="underline hover:text-gray-600">Open Source on GitHub</a>
+      <a
+        href="https://github.com/findjes-us/findjes.us"
+        target="_blank"
+        rel="noopener"
+        class="underline hover:text-gray-600"
+      >Open Source on GitHub</a>
     </footer>
   </div>
 </template>

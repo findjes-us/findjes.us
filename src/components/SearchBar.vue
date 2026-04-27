@@ -9,7 +9,7 @@
         class="flex-1 outline-none text-sm text-gray-800 placeholder-gray-400"
         @keyup.enter="emit('search', localQuery)"
         @input="emit('search', localQuery)"
-      />
+      >
       <button
         v-if="localQuery"
         class="text-gray-400 hover:text-gray-600"

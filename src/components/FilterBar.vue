@@ -7,8 +7,16 @@
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
         @change="emit('update:book', $event.target.value); emit('update:chapter', ''); emit('update:verse', '')"
       >
-        <option value="">All Books</option>
-        <option v-for="b in books" :key="b" :value="b">{{ b }}</option>
+        <option value="">
+          All Books
+        </option>
+        <option
+          v-for="b in books"
+          :key="b"
+          :value="b"
+        >
+          {{ b }}
+        </option>
       </select>
     </div>
 
@@ -20,8 +28,16 @@
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
         @change="emit('update:chapter', $event.target.value); emit('update:verse', '')"
       >
-        <option value="">All Chapters</option>
-        <option v-for="c in chapters" :key="c" :value="c">{{ c }}</option>
+        <option value="">
+          All Chapters
+        </option>
+        <option
+          v-for="c in chapters"
+          :key="c"
+          :value="c"
+        >
+          {{ c }}
+        </option>
       </select>
     </div>
 
@@ -33,8 +49,16 @@
         class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
         @change="emit('update:verse', $event.target.value)"
       >
-        <option value="">All Verses</option>
-        <option v-for="v in verses" :key="v" :value="v">{{ v }}</option>
+        <option value="">
+          All Verses
+        </option>
+        <option
+          v-for="v in verses"
+          :key="v"
+          :value="v"
+        >
+          {{ v }}
+        </option>
       </select>
     </div>
 

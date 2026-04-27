@@ -1,22 +1,38 @@
 <template>
   <div>
-    <div v-if="passages.length === 0" class="text-center py-16 text-gray-500">
+    <div
+      v-if="passages.length === 0"
+      class="text-center py-16 text-gray-500"
+    >
       <IconMoodSad class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-      <p class="text-lg font-medium">No matching passages found.</p>
+      <p class="text-lg font-medium">
+        No matching passages found.
+      </p>
       <p class="text-sm mt-1">
         Try adjusting your filters or
         <button
           class="text-indigo-600 underline hover:text-indigo-800"
           @click="emit('show-tips')"
-        >tips for using wildcards</button>.
+        >
+          tips for using wildcards
+        </button>.
       </p>
     </div>
     <div v-else>
-      <p class="text-xs text-gray-400 mb-3">{{ passages.length }} passage{{ passages.length !== 1 ? 's' : '' }} found</p>
+      <p class="text-xs text-gray-400 mb-3">
+        {{ passages.length }} passage{{ passages.length !== 1 ? 's' : '' }} found
+      </p>
       <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <PassageCard v-for="(p, i) in visiblePassages" :key="i" :passage="p" />
+        <PassageCard
+          v-for="(p, i) in visiblePassages"
+          :key="i"
+          :passage="p"
+        />
       </div>
-      <div v-if="passages.length > pageSize" class="mt-6 flex justify-center gap-2">
+      <div
+        v-if="passages.length > pageSize"
+        class="mt-6 flex justify-center gap-2"
+      >
         <button
           class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
           :disabled="page === 1"
