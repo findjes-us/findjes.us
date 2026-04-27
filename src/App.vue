@@ -5,7 +5,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <button
           class="flex items-center gap-2 text-xl font-bold hover:opacity-90"
-          @click="currentPage = 'home'"
+          @click="navigateTo('home')"
         >
           <IconCross class="w-6 h-6" />
           FindJes.us
@@ -14,7 +14,7 @@
           <button
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'home' ? 'font-semibold underline' : ''"
-            @click="currentPage = 'home'"
+            @click="navigateTo('home')"
           >
             <IconBook class="w-4 h-4" />
             Passages
@@ -22,7 +22,7 @@
           <button
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'about' ? 'font-semibold underline' : ''"
-            @click="currentPage = 'about'"
+            @click="navigateTo('about')"
           >
             <IconInfoCircle class="w-4 h-4" />
             About
@@ -58,8 +58,8 @@
       <template v-else>
         <div class="space-y-4">
           <SearchBar
-            v-model="searchQuery"
-            @search="searchQuery = $event"
+            :model-value="searchQuery"
+            @search="onSearch"
           />
           <FilterBar
             v-model:book="filterBook"
@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { IconCross, IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import SearchBar from './components/SearchBar.vue'
@@ -131,7 +131,61 @@ const {
   filteredPassages,
 } = usePassages(rawData)
 
+// ── URL sync ────────────────────────────────────────────────────────────────
+
+// Guard to prevent update loops when syncing state from the URL.
+let syncing = false
+
+function updateURL() {
+  if (syncing) return
+  const params = new URLSearchParams()
+  if (searchQuery.value) params.set('q', searchQuery.value)
+  if (filterBook.value) params.set('book', filterBook.value)
+  if (filterChapter.value) params.set('chapter', filterChapter.value)
+  if (filterVerse.value) params.set('verse', filterVerse.value)
+  if (currentPage.value === 'about') params.set('page', 'about')
+  const qs = params.toString()
+  window.history.pushState({}, '', qs ? `?${qs}` : window.location.pathname)
+}
+
+function syncStateFromURL() {
+  syncing = true
+  const params = new URLSearchParams(window.location.search)
+  searchQuery.value = params.get('q') ?? ''
+  filterBook.value = params.get('book') ?? ''
+  filterChapter.value = params.get('chapter') ?? ''
+  filterVerse.value = params.get('verse') ?? ''
+  currentPage.value = params.get('page') === 'about' ? 'about' : 'home'
+  // Allow watchers triggered by the above assignments to fire before we clear
+  // the guard, so they don't call updateURL while we're loading from the URL.
+  nextTick(() => { syncing = false })
+}
+
+// Sync filter-bar changes to URL immediately (they are instant UI selections).
+watch([filterBook, filterChapter, filterVerse], updateURL)
+
+// ── Handlers ────────────────────────────────────────────────────────────────
+
+function onSearch(query) {
+  searchQuery.value = query
+  updateURL()
+}
+
+function navigateTo(page) {
+  currentPage.value = page
+  updateURL()
+}
+
+// ── Lifecycle ───────────────────────────────────────────────────────────────
+
+function onPopState() {
+  syncStateFromURL()
+}
+
 onMounted(async () => {
+  window.addEventListener('popstate', onPopState)
+  syncStateFromURL()
+
   try {
     const res = await fetch('/web.json')
     if (!res.ok) throw new Error(`Failed to load data: ${res.statusText}`)
@@ -142,5 +196,9 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('popstate', onPopState)
 })
 </script>

@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { matchesWildcard } from '../utils/wildcard.js'
+import { parsePassageRange, passageMatchesRange } from '../utils/parsePassageRange.js'
 
 export function usePassages(dataRef) {
   const searchQuery = ref('')
@@ -52,8 +53,17 @@ export function usePassages(dataRef) {
     return chapterObj.passages.map((p) => p.verse)
   })
 
+  const passageRange = computed(() =>
+    parsePassageRange(searchQuery.value, books.value)
+  )
+
   const filteredPassages = computed(() => {
+    const range = passageRange.value
     return allPassages.value.filter((p) => {
+      // When the search query is a valid passage reference, use range filtering
+      // exclusively and ignore the book/chapter/verse filter bar.
+      if (range) return passageMatchesRange(p, range)
+
       if (filterBook.value && p.book !== filterBook.value) return false
       if (filterChapter.value && p.chapter !== Number(filterChapter.value)) return false
       if (filterVerse.value && p.verse !== Number(filterVerse.value)) return false
@@ -72,5 +82,6 @@ export function usePassages(dataRef) {
     verses,
     filteredPassages,
     allPassages,
+    passageRange,
   }
 }
