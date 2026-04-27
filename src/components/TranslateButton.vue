@@ -1,7 +1,6 @@
 <template>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-1">
     <IconLanguage class="w-4 h-4 shrink-0" />
-    <span class="text-sm">Translate</span>
     <div
       id="google_translate_element"
       class="translate-widget"
@@ -41,5 +40,7 @@ onMounted(() => {
   background: white;
   color: #111827;
   cursor: pointer;
+  min-width: 9rem;
+  white-space: nowrap;
 }
 </style>
