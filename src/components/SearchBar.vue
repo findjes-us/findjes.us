@@ -10,7 +10,7 @@
         id="passage-search"
         v-model="localQuery"
         type="text"
-        placeholder="Search passages or a passage reference, e.g. Matthew 17-18:3"
+        placeholder="Search for words or a passage reference, e.g. Matthew 17-18:3"
         class="flex-1 outline-none text-sm text-gray-800 placeholder-gray-400"
         @keyup.enter="submit"
       >
