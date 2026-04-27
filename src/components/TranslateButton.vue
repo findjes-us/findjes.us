@@ -32,10 +32,8 @@ onMounted(() => {
 </script>
 
 <style>
-/* Make the Google Translate select scrollable and vertically oriented */
+/* Style the Google Translate language select */
 .translate-widget .goog-te-combo {
-  max-height: 40vh;
-  overflow-y: auto;
   font-size: 0.875rem;
   border-radius: 0.25rem;
   border: 1px solid #d1d5db;
