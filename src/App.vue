@@ -10,7 +10,7 @@
           <IconCross class="w-6 h-6" />
           FindJes.us
         </button>
-        <nav class="flex flex-wrap items-center gap-4">
+        <nav class="flex flex-nowrap items-center gap-4">
           <button
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'home' ? 'font-semibold underline' : ''"
