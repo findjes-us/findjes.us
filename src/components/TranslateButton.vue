@@ -1,50 +1,23 @@
 <template>
-  <div
-    ref="containerRef"
-    class="relative"
-  >
-    <button
-      class="text-sm hover:underline flex items-center gap-1"
-      :class="open ? 'font-semibold underline' : ''"
-      :aria-expanded="open"
-      aria-haspopup="true"
-      @click.stop="toggle"
-    >
-      <IconLanguage class="w-4 h-4" />
-      Translate
-    </button>
-
+  <div class="flex items-center gap-2">
+    <IconLanguage class="w-4 h-4 shrink-0" />
+    <span class="text-sm">Translate</span>
     <div
-      v-show="open"
-      class="absolute right-0 mt-2 z-50 bg-white rounded shadow-lg p-3 min-w-max"
-    >
-      <div id="google_translate_element" />
-    </div>
+      id="google_translate_element"
+      class="translate-widget"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted } from 'vue'
 import { IconLanguage } from '@tabler/icons-vue'
-
-const open = ref(false)
-const containerRef = ref(null)
 
 function initGoogleTranslate() {
   new window.google.translate.TranslateElement(
     { pageLanguage: 'en', layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE },
     'google_translate_element'
   )
-}
-
-function toggle() {
-  open.value = !open.value
-}
-
-function onClickOutside(event) {
-  if (containerRef.value && !containerRef.value.contains(event.target)) {
-    open.value = false
-  }
 }
 
 onMounted(() => {
@@ -55,11 +28,18 @@ onMounted(() => {
   if (window.google?.translate?.TranslateElement) {
     initGoogleTranslate()
   }
-
-  document.addEventListener('click', onClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', onClickOutside)
 })
 </script>
+
+<style>
+/* Style the Google Translate language select */
+.translate-widget .goog-te-combo {
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  padding: 0.125rem 0.25rem;
+  background: white;
+  color: #111827;
+  cursor: pointer;
+}
+</style>
