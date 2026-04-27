@@ -19,58 +19,62 @@
       </p>
     </div>
     <div v-else>
-      <p class="text-xs text-gray-400 mb-3">
+      <p class="text-xs text-gray-400 mb-4">
         {{ passages.length }} passage{{ passages.length !== 1 ? 's' : '' }} found
       </p>
-      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <PassageCard
-          v-for="p in visiblePassages"
-          :key="`${p.book}-${p.chapter}-${p.verse}`"
-          :passage="p"
-        />
-      </div>
-      <div
-        v-if="passages.length > pageSize"
-        class="mt-6 flex justify-center gap-2"
-      >
-        <button
-          class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
-          :disabled="page === 1"
-          @click="page--"
+      <div class="space-y-6">
+        <section
+          v-for="group in groupedPassages"
+          :key="`${group.book}-${group.chapter}`"
         >
-          <IconChevronLeft class="w-4 h-4 inline" /> Prev
-        </button>
-        <span class="px-3 py-2 text-sm text-gray-600">{{ page }} / {{ totalPages }}</span>
-        <button
-          class="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
-          :disabled="page === totalPages"
-          @click="page++"
-        >
-          Next <IconChevronRight class="w-4 h-4 inline" />
-        </button>
+          <h2 class="font-bold text-base mb-1">
+            {{ group.book }} {{ group.chapter }}
+          </h2>
+          <p class="text-sm text-gray-800 leading-relaxed">
+            <template
+              v-for="(v, i) in group.verses"
+              :key="v.verse"
+            >
+              {{ i > 0 ? ' ' : '' }}<sup
+                :id="anchorId(group.book, group.chapter, v.verse)"
+                class="mr-0.5"
+              >
+                <a
+                  :href="`#${anchorId(group.book, group.chapter, v.verse)}`"
+                  class="text-indigo-500 hover:text-indigo-700"
+                >{{ v.verse }}</a>
+              </sup>{{ v.text }}
+            </template>
+          </p>
+        </section>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { IconMoodSad, IconChevronLeft, IconChevronRight } from '@tabler/icons-vue'
-import PassageCard from './PassageCard.vue'
+import { computed } from 'vue'
+import { IconMoodSad } from '@tabler/icons-vue'
 
 const props = defineProps({
   passages: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['show-tips'])
 
-const pageSize = 30
-const page = ref(1)
+function anchorId(book, chapter, verse) {
+  return `${book.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${chapter}-${verse}`
+}
 
-watch(() => props.passages, () => { page.value = 1 })
-
-const totalPages = computed(() => Math.ceil(props.passages.length / pageSize))
-const visiblePassages = computed(() => {
-  const start = (page.value - 1) * pageSize
-  return props.passages.slice(start, start + pageSize)
+const groupedPassages = computed(() => {
+  const groups = []
+  let current = null
+  for (const p of props.passages) {
+    if (!current || current.book !== p.book || current.chapter !== p.chapter) {
+      current = { book: p.book, chapter: p.chapter, verses: [] }
+      groups.push(current)
+    }
+    current.verses.push({ verse: p.verse, text: p.text })
+  }
+  return groups
 })
 </script>
