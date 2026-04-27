@@ -66,12 +66,14 @@
             v-model:book="filterBook"
             v-model:chapter="filterChapter"
             v-model:verse="filterVerse"
+            v-model:red-letter="redLetter"
             :books="books"
             :chapters="chapters"
             :verses="verses"
           />
           <PassageList
             :passages="filteredPassages"
+            :red-letter="redLetter"
             @show-tips="showTips = true"
           />
         </div>
@@ -119,6 +121,7 @@ const currentPage = ref('home')
 const showTips = ref(false)
 const loading = ref(true)
 const error = ref(null)
+const redLetter = ref(false)
 
 const rawData = ref({})
 

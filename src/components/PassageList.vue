@@ -43,7 +43,7 @@
                   :href="`#${anchorId(group.book, group.chapter, v.verse)}`"
                   class="text-indigo-500 hover:text-indigo-700"
                 >{{ v.verse }}</a>
-              </sup>{{ v.text }}
+              </sup><span v-html="renderText(v.text)" />
             </template>
           </p>
         </section>
@@ -55,11 +55,17 @@
 <script setup>
 import { computed } from 'vue'
 import { IconMoodSad } from '@tabler/icons-vue'
+import { renderJesusText } from '../utils/renderJesusText.js'
 
 const props = defineProps({
   passages: { type: Array, default: () => [] },
+  redLetter: { type: Boolean, default: false },
 })
 const emit = defineEmits(['show-tips'])
+
+function renderText(text) {
+  return renderJesusText(text, props.redLetter)
+}
 
 function anchorId(book, chapter, verse) {
   return `${book.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${chapter}-${verse}`

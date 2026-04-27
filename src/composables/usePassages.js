@@ -2,6 +2,12 @@ import { ref, computed } from 'vue'
 import { matchesWildcard } from '../utils/wildcard.js'
 import { parsePassageRange, passageMatchesRange } from '../utils/parsePassageRange.js'
 
+// Strip <jesus>...</jesus> tags from text before searching so that the tag
+// markup itself does not influence search results.
+function stripJesusTags(text) {
+  return text.replace(/<\/?jesus>/gi, '')
+}
+
 export function usePassages(dataRef) {
   const searchQuery = ref('')
   const filterBook = ref('')
@@ -67,7 +73,7 @@ export function usePassages(dataRef) {
       if (filterBook.value && p.book !== filterBook.value) return false
       if (filterChapter.value && p.chapter !== Number(filterChapter.value)) return false
       if (filterVerse.value && p.verse !== Number(filterVerse.value)) return false
-      if (searchQuery.value && !matchesWildcard(p.text, searchQuery.value)) return false
+      if (searchQuery.value && !matchesWildcard(stripJesusTags(p.text), searchQuery.value)) return false
       return true
     })
   })
