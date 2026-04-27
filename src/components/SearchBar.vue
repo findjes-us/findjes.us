@@ -40,18 +40,20 @@ import { IconSearch, IconX } from '@tabler/icons-vue'
 const props = defineProps({
   modelValue: { type: String, default: '' },
 })
-const emit = defineEmits(['search'])
+const emit = defineEmits(['update:modelValue', 'search'])
 
 const localQuery = ref(props.modelValue)
 // Sync external value changes (e.g. initial load from URL) into the input field.
 watch(() => props.modelValue, (v) => { localQuery.value = v })
 
 function submit() {
+  emit('update:modelValue', localQuery.value)
   emit('search', localQuery.value)
 }
 
 function clear() {
   localQuery.value = ''
+  emit('update:modelValue', '')
   emit('search', '')
 }
 </script>

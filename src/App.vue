@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { IconCross, IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import SearchBar from './components/SearchBar.vue'
@@ -156,8 +156,9 @@ function syncStateFromURL() {
   filterChapter.value = params.get('chapter') ?? ''
   filterVerse.value = params.get('verse') ?? ''
   currentPage.value = params.get('page') === 'about' ? 'about' : 'home'
-  // Use a microtask so the watchers below fire after the flag is cleared.
-  Promise.resolve().then(() => { syncing = false })
+  // Allow watchers triggered by the above assignments to fire before we clear
+  // the guard, so they don't call updateURL while we're loading from the URL.
+  nextTick(() => { syncing = false })
 }
 
 // Sync filter-bar changes to URL immediately (they are instant UI selections).

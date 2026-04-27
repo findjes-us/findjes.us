@@ -7,7 +7,7 @@
  *   "Matthew 17:5-18:3"   → 17:5–18:3
  *
  * Returns { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse }
- * or null if the string is not a recognisable passage reference.
+ * or null if the string is not a recognizable passage reference.
  *
  * Rules (per spec):
  *  - If a chapter is provided without a verse, verse 1 is implied.
@@ -56,6 +56,10 @@ export function parsePassageRange(query, knownBooks) {
   return null
 }
 
+// Multiplier used to combine chapter and verse into a single comparable integer.
+// A value of 1000000 safely accommodates books with up to 999,999 verses per chapter.
+const VERSE_OFFSET_MULTIPLIER = 1000000
+
 /**
  * Test whether a flat passage object falls within a parsed passage range.
  *
@@ -66,7 +70,7 @@ export function parsePassageRange(query, knownBooks) {
 export function passageMatchesRange(passage, range) {
   if (passage.book !== range.book) return false
 
-  const pPos = passage.chapter * 1000000 + passage.verse
+  const pPos = passage.chapter * VERSE_OFFSET_MULTIPLIER + passage.verse
 
   if (range.endChapter === null) {
     // No range – single chapter or single verse.
@@ -76,8 +80,8 @@ export function passageMatchesRange(passage, range) {
     return passage.chapter === range.startChapter
   }
 
-  const startPos = range.startChapter * 1000000 + range.startVerse
-  const endPos = range.endChapter * 1000000 + range.endVerse
+  const startPos = range.startChapter * VERSE_OFFSET_MULTIPLIER + range.startVerse
+  const endPos = range.endChapter * VERSE_OFFSET_MULTIPLIER + range.endVerse
 
   if (startPos > endPos) {
     // Non-sequential range: show all passages from start onwards within the book.
