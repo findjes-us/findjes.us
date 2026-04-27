@@ -31,6 +31,22 @@ onMounted(() => {
 </script>
 
 <style>
+/* Keep the translate widget container on one line */
+.translate-widget {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Force the Google Translate gadget wrapper inline */
+.translate-widget .goog-te-gadget {
+  display: inline-flex !important;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0 !important; /* hide the "Powered by Google Translate" text */
+  line-height: 1;
+}
+
 /* Style the Google Translate language select */
 .translate-widget .goog-te-combo {
   font-size: 0.875rem;
@@ -42,5 +58,11 @@ onMounted(() => {
   cursor: pointer;
   min-width: 9rem;
   white-space: nowrap;
+  display: inline-block;
+}
+
+/* Hide the Google branding span that can cause extra height */
+.translate-widget .goog-te-gadget > span {
+  display: none !important;
 }
 </style>
