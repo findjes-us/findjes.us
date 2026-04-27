@@ -65,4 +65,25 @@ onMounted(() => {
 .translate-widget .goog-te-gadget > span {
   display: none !important;
 }
+
+/* Force the SIMPLE layout inner container to display as a single row */
+.translate-widget .goog-te-gadget-simple {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-direction: row !important;
+  white-space: nowrap;
+}
+
+/* Keep the language text and arrow span inline */
+.translate-widget .goog-te-gadget-simple > span,
+.translate-widget .goog-te-gadget-simple > span > span {
+  display: inline !important;
+  vertical-align: middle;
+}
+
+/* Keep the Google icon inline and vertically centred */
+.translate-widget .goog-te-gadget-icon {
+  display: inline-block !important;
+  vertical-align: middle;
+}
 </style>
