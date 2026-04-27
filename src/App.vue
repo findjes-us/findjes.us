@@ -27,6 +27,7 @@
             <IconInfoCircle class="w-4 h-4" />
             About
           </button>
+          <TranslateButton />
         </nav>
       </div>
     </header>
@@ -112,6 +113,7 @@ import FilterBar from './components/FilterBar.vue'
 import PassageList from './components/PassageList.vue'
 import AboutPage from './components/AboutPage.vue'
 import SearchTipsModal from './components/SearchTipsModal.vue'
+import TranslateButton from './components/TranslateButton.vue'
 
 const currentPage = ref('home')
 const showTips = ref(false)
