@@ -94,11 +94,23 @@
       <IconX class="w-3 h-3" />
       Clear filters
     </button>
+
+    <button
+      class="flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md border transition-colors"
+      :class="redLetter
+        ? 'bg-red-600 border-red-600 text-white hover:bg-red-700'
+        : 'bg-white border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'"
+      :aria-pressed="redLetter"
+      @click="emit('update:redLetter', !redLetter)"
+    >
+      <IconBible class="w-3.5 h-3.5" />
+      Highlight Jesus' Words
+    </button>
   </div>
 </template>
 
 <script setup>
-import { IconBook, IconBookmark, IconHash, IconX } from '@tabler/icons-vue'
+import { IconBook, IconBookmark, IconHash, IconX, IconBible } from '@tabler/icons-vue'
 
 defineProps({
   book: { type: String, default: '' },
@@ -107,9 +119,10 @@ defineProps({
   books: { type: Array, default: () => [] },
   chapters: { type: Array, default: () => [] },
   verses: { type: Array, default: () => [] },
+  redLetter: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:book', 'update:chapter', 'update:verse'])
+const emit = defineEmits(['update:book', 'update:chapter', 'update:verse', 'update:redLetter'])
 
 function resetFilters() {
   emit('update:book', '')
