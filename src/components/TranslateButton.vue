@@ -6,7 +6,53 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+
+let observer = null
+let rafId = null
+
+/**
+ * Apply inline styles directly on the Google-injected elements so they
+ * override any stylesheet rule (including Google's own !important rules that
+ * are injected asynchronously and cannot be beaten by CSS alone).
+ */
+function applyLayoutFix() {
+  const simple = document.querySelector('#google_translate_element .goog-te-gadget-simple')
+  if (!simple) return
+
+  simple.style.setProperty('display', 'inline-flex', 'important')
+  simple.style.setProperty('align-items', 'center', 'important')
+  simple.style.setProperty('flex-direction', 'row', 'important')
+  simple.style.setProperty('white-space', 'nowrap', 'important')
+
+  // Un-float the Google "G" logo image
+  const icon = simple.querySelector('img')
+  if (icon) {
+    icon.style.setProperty('float', 'none', 'important')
+    icon.style.setProperty('display', 'inline-block', 'important')
+    icon.style.setProperty('vertical-align', 'middle', 'important')
+  }
+
+  // Keep the anchor (and its spans) inline so text doesn't wrap
+  const anchor = simple.querySelector('a')
+  if (anchor) {
+    anchor.style.setProperty('display', 'inline', 'important')
+    anchor.style.setProperty('white-space', 'nowrap', 'important')
+    anchor.style.setProperty('vertical-align', 'middle', 'important')
+  }
+}
+
+/**
+ * Debounce layout fixes to one rAF frame so rapid Google Translate mutations
+ * during widget initialisation are batched into a single DOM query + update.
+ */
+function scheduleLayoutFix() {
+  if (rafId !== null) return
+  rafId = requestAnimationFrame(() => {
+    rafId = null
+    applyLayoutFix()
+  })
+}
 
 function initGoogleTranslate() {
   new window.google.translate.TranslateElement(
@@ -22,6 +68,23 @@ onMounted(() => {
   // If the script already finished loading before this component mounted, init now
   if (window.google?.translate?.TranslateElement) {
     initGoogleTranslate()
+  }
+
+  // Watch for Google Translate to inject / mutate its widget, then fix the layout.
+  // Only observe childList/subtree (DOM changes) and 'style' attributes — no need
+  // to track 'class' changes which would trigger unnecessary callbacks.
+  const el = document.getElementById('google_translate_element')
+  if (el) {
+    observer = new MutationObserver(scheduleLayoutFix)
+    observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
+  }
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+    rafId = null
   }
 })
 </script>
