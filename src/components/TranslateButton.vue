@@ -1,11 +1,14 @@
 <template>
-  <div class="flex items-center gap-1">
-    <IconLanguage class="w-4 h-4 shrink-0" />
-    <div
-      id="google_translate_element"
-      class="translate-widget"
-    />
+  <div
+    class="text-sm hover:underline flex items-center gap-1"
+  >
+    <IconLanguage class="w-4 h-4" />
+    Translate
   </div>
+  <div
+    id="google_translate_element"
+    class="translate-widget"
+  />
 </template>
 
 <script setup>
@@ -14,16 +17,14 @@ import { IconLanguage } from '@tabler/icons-vue'
 
 function initGoogleTranslate() {
   new window.google.translate.TranslateElement(
-    { pageLanguage: 'en', layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE },
+    { pageLanguage: 'en', layout: window.google.translate.TranslateElement.InlineLayout.HORIZONTAL },
     'google_translate_element'
   )
 }
 
 onMounted(() => {
-  // Set the global callback invoked by the Google Translate script
   window.googleTranslateElementInit = initGoogleTranslate
 
-  // If the script already finished loading before this component mounted, init now
   if (window.google?.translate?.TranslateElement) {
     initGoogleTranslate()
   }
@@ -31,24 +32,31 @@ onMounted(() => {
 </script>
 
 <style>
-/* Keep the translate widget container on one line */
+/* Reserve space in the nav bar before Google Translate loads */
 .translate-widget {
   display: inline-flex;
   align-items: center;
-  white-space: nowrap;
+  min-width: 9rem;
+  min-height: 1.75rem;
 }
 
-/* Force the Google Translate gadget wrapper inline */
-.translate-widget .goog-te-gadget {
+/* Keep the gadget wrapper inline and hide "Powered by Google Translate" */
+#google_translate_element .goog-te-gadget {
   display: inline-flex !important;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 0 !important; /* hide the "Powered by Google Translate" text */
-  line-height: 1;
+  align-items: center !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
 }
 
-/* Style the Google Translate language select */
-.translate-widget .goog-te-combo {
+/* Hide the <br> and branding span Google injects after the <select> */
+#google_translate_element .goog-te-gadget br,
+#google_translate_element .goog-te-gadget > span {
+  display: none !important;
+}
+
+/* Style the language <select> dropdown */
+#google_translate_element .goog-te-combo {
+  display: inline-block !important;
   font-size: 0.875rem;
   border-radius: 0.25rem;
   border: 1px solid #d1d5db;
@@ -58,32 +66,5 @@ onMounted(() => {
   cursor: pointer;
   min-width: 9rem;
   white-space: nowrap;
-  display: inline-block;
-}
-
-/* Hide the Google branding span that can cause extra height */
-.translate-widget .goog-te-gadget > span {
-  display: none !important;
-}
-
-/* Force the SIMPLE layout inner container to display as a single row */
-.translate-widget .goog-te-gadget-simple {
-  display: inline-flex !important;
-  align-items: center !important;
-  flex-direction: row !important;
-  white-space: nowrap;
-}
-
-/* Keep the language text and arrow span inline */
-.translate-widget .goog-te-gadget-simple > span,
-.translate-widget .goog-te-gadget-simple > span > span {
-  display: inline !important;
-  vertical-align: middle;
-}
-
-/* Keep the Google icon inline and vertically centred */
-.translate-widget .goog-te-gadget-icon {
-  display: inline-block !important;
-  vertical-align: middle;
 }
 </style>
