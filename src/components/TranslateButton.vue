@@ -1,5 +1,11 @@
 <template>
   <div
+    class="text-sm hover:underline flex items-center gap-1"
+  >
+    <IconLanguage class="w-4 h-4" />
+    Translate
+  </div>
+  <div
     id="google_translate_element"
     class="translate-widget"
   />
@@ -7,6 +13,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { IconLanguage } from '@tabler/icons-vue'
 
 function initGoogleTranslate() {
   new window.google.translate.TranslateElement(
