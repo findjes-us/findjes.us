@@ -8,43 +8,56 @@
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 
-let observer = null
+let widgetObserver = null   // watches widget DOM / style mutations
+let headObserver = null     // watches <head> for Google's CSS <link> injection
 let rafId = null
+let timers = []
 
 /**
- * Apply inline styles directly on the Google-injected elements so they
- * override any stylesheet rule (including Google's own !important rules that
- * are injected asynchronously and cannot be beaten by CSS alone).
+ * Apply inline !important styles directly on every element inside the widget.
+ * Inline !important set via setProperty is the only mechanism that can beat
+ * another inline !important (because it executes later in the same cascade
+ * layer).  CSS rules — even with high specificity + !important — cannot
+ * override inline styles Google sets with !important.
  */
 function applyLayoutFix() {
-  const simple = document.querySelector('#google_translate_element .goog-te-gadget-simple')
+  const el = document.getElementById('google_translate_element')
+  if (!el) return
+
+  // Fix the outer .goog-te-gadget wrapper (Google may set display:block inline)
+  const gadget = el.querySelector('.goog-te-gadget')
+  if (gadget) {
+    gadget.style.setProperty('display', 'inline-flex', 'important')
+    gadget.style.setProperty('align-items', 'center', 'important')
+    gadget.style.setProperty('white-space', 'nowrap', 'important')
+    gadget.style.setProperty('flex-wrap', 'nowrap', 'important')
+  }
+
+  const simple = el.querySelector('.goog-te-gadget-simple')
   if (!simple) return
 
   simple.style.setProperty('display', 'inline-flex', 'important')
   simple.style.setProperty('align-items', 'center', 'important')
   simple.style.setProperty('flex-direction', 'row', 'important')
+  simple.style.setProperty('flex-wrap', 'nowrap', 'important')
   simple.style.setProperty('white-space', 'nowrap', 'important')
 
-  // Un-float the Google "G" logo image
-  const icon = simple.querySelector('img')
-  if (icon) {
-    icon.style.setProperty('float', 'none', 'important')
-    icon.style.setProperty('display', 'inline-block', 'important')
-    icon.style.setProperty('vertical-align', 'middle', 'important')
-  }
-
-  // Keep the anchor (and its spans) inline so text doesn't wrap
-  const anchor = simple.querySelector('a')
-  if (anchor) {
-    anchor.style.setProperty('display', 'inline', 'important')
-    anchor.style.setProperty('white-space', 'nowrap', 'important')
-    anchor.style.setProperty('vertical-align', 'middle', 'important')
+  // Fix every direct child: clear floats and force inline layout
+  for (const child of simple.children) {
+    child.style.setProperty('float', 'none', 'important')
+    child.style.setProperty('vertical-align', 'middle', 'important')
+    if (child.tagName === 'IMG') {
+      // Images must be inline-block so they retain their dimensions
+      child.style.setProperty('display', 'inline-block', 'important')
+    } else {
+      child.style.setProperty('display', 'inline', 'important')
+      child.style.setProperty('white-space', 'nowrap', 'important')
+    }
   }
 }
 
 /**
- * Debounce layout fixes to one rAF frame so rapid Google Translate mutations
- * during widget initialisation are batched into a single DOM query + update.
+ * Debounce multiple rapid mutations into a single rAF pass.
  */
 function scheduleLayoutFix() {
   if (rafId !== null) return
@@ -62,30 +75,53 @@ function initGoogleTranslate() {
 }
 
 onMounted(() => {
-  // Set the global callback invoked by the Google Translate script
   window.googleTranslateElementInit = initGoogleTranslate
 
-  // If the script already finished loading before this component mounted, init now
   if (window.google?.translate?.TranslateElement) {
     initGoogleTranslate()
   }
 
-  // Watch for Google Translate to inject / mutate its widget, then fix the layout.
-  // Only observe childList/subtree (DOM changes) and 'style' attributes — no need
-  // to track 'class' changes which would trigger unnecessary callbacks.
+  // Watch widget for DOM and inline-style mutations
   const el = document.getElementById('google_translate_element')
   if (el) {
-    observer = new MutationObserver(scheduleLayoutFix)
-    observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
+    widgetObserver = new MutationObserver(scheduleLayoutFix)
+    widgetObserver.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style'],
+    })
   }
+
+  // Watch <head> so we re-apply the fix when Google's CSS <link> is injected.
+  // Google's stylesheet is loaded asynchronously; a CSS recalc triggered by
+  // a new <link> does not fire a style-attribute mutation on widget elements,
+  // so the widget observer alone would miss it.
+  headObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeName === 'LINK' || node.nodeName === 'STYLE') {
+          scheduleLayoutFix()
+        }
+      }
+    }
+  })
+  headObserver.observe(document.head, { childList: true })
+
+  // Belt-and-suspenders: re-apply at several points after mount to catch any
+  // async init / CSS load that the observers might race with.
+  timers = [0, 150, 400, 900, 2000].map((ms) => setTimeout(applyLayoutFix, ms))
 })
 
 onUnmounted(() => {
-  observer?.disconnect()
+  widgetObserver?.disconnect()
+  headObserver?.disconnect()
   if (rafId !== null) {
     cancelAnimationFrame(rafId)
     rafId = null
   }
+  timers.forEach(clearTimeout)
+  timers = []
 })
 </script>
 
