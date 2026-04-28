@@ -1,16 +1,12 @@
 <template>
-  <div class="flex items-center gap-1">
-    <IconLanguage class="w-4 h-4 shrink-0" />
-    <div
-      id="google_translate_element"
-      class="translate-widget"
-    />
-  </div>
+  <div
+    id="google_translate_element"
+    class="translate-widget"
+  />
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
-import { IconLanguage } from '@tabler/icons-vue'
 
 function initGoogleTranslate() {
   new window.google.translate.TranslateElement(
@@ -38,52 +34,47 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-/* Force the Google Translate gadget wrapper inline */
-.translate-widget .goog-te-gadget {
-  display: inline-flex !important;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 0 !important; /* hide the "Powered by Google Translate" text */
-  line-height: 1;
-}
+/*
+ * Use #google_translate_element (ID specificity: 1-0-0) in every selector so
+ * our !important rules outrank Google's own !important rules, which are injected
+ * asynchronously at class-level specificity (0-1-0) and would otherwise win the
+ * cascade tie-breaker because they arrive later.
+ */
 
-/* Style the Google Translate language select */
-.translate-widget .goog-te-combo {
-  font-size: 0.875rem;
-  border-radius: 0.25rem;
-  border: 1px solid #d1d5db;
-  padding: 0.125rem 0.25rem;
-  background: white;
-  color: #111827;
-  cursor: pointer;
-  min-width: 9rem;
-  white-space: nowrap;
-  display: inline-block;
+/* Force the Google Translate gadget wrapper inline */
+#google_translate_element .goog-te-gadget {
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  font-size: 0 !important; /* hide the "Powered by Google Translate" text */
+  line-height: 1 !important;
 }
 
 /* Hide the Google branding span that can cause extra height */
-.translate-widget .goog-te-gadget > span {
+#google_translate_element .goog-te-gadget > span {
   display: none !important;
 }
 
 /* Force the SIMPLE layout inner container to display as a single row */
-.translate-widget .goog-te-gadget-simple {
+#google_translate_element .goog-te-gadget-simple {
   display: inline-flex !important;
   align-items: center !important;
   flex-direction: row !important;
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
-/* Keep the language text and arrow span inline */
-.translate-widget .goog-te-gadget-simple > span,
-.translate-widget .goog-te-gadget-simple > span > span {
-  display: inline !important;
-  vertical-align: middle;
-}
-
-/* Keep the Google icon inline and vertically centred */
-.translate-widget .goog-te-gadget-icon {
+/* Keep the Google icon inline, vertically centred, and un-floated */
+#google_translate_element .goog-te-gadget-icon {
   display: inline-block !important;
-  vertical-align: middle;
+  float: none !important;
+  vertical-align: middle !important;
+}
+
+/* Keep the anchor and its child spans inline and on one line */
+#google_translate_element .goog-te-gadget-simple > a,
+#google_translate_element .goog-te-gadget-simple > a > span {
+  display: inline !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
 }
 </style>
