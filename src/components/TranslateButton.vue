@@ -90,11 +90,16 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* Keep the translate widget container on one line */
+/* Keep the translate widget container on one line.
+ * min-width/min-height reserve space before Google Translate loads so the
+ * nav bar doesn't reflow and Google has enough horizontal room to render
+ * the SIMPLE widget (G icon + "Select Language ▼") on a single row. */
 .translate-widget {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
+  min-width: 160px;
+  min-height: 30px;
 }
 
 /*
