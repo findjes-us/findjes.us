@@ -1,7 +1,7 @@
 /**
  * Renders passage text, optionally highlighting text wrapped in <jesus>...</jesus> tags.
  *
- * When highlight is true, <jesus>...</jesus> sections are wrapped in a bold span.
+ * When highlight is true, <jesus>...</jesus> sections are wrapped in a span with class "jesus".
  * All other HTML characters in the text are escaped to prevent XSS.
  *
  * @param {string} text - Raw passage text, possibly containing <jesus>…</jesus> tags
@@ -15,7 +15,7 @@ export function renderJesusText(text, highlight) {
   for (const part of parts) {
     if (part.toLowerCase() === '<jesus>') {
       inJesus = true
-      if (highlight) result += '<span class="font-bold">'
+      if (highlight) result += '<span class="jesus">'
     } else if (part.toLowerCase() === '</jesus>') {
       if (highlight && inJesus) result += '</span>'
       inJesus = false
