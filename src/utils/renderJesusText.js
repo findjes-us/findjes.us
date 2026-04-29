@@ -1,23 +1,23 @@
 /**
- * Renders passage text, optionally highlighting text wrapped in <jesus>...</jesus> tags.
+ * Renders passage text, optionally bolding text wrapped in <span class="jesus">...</span> tags.
  *
- * When highlight is true, <jesus>...</jesus> sections are wrapped in a span with class "jesus".
+ * When highlight is true, <span class="jesus"> sections also receive the "font-bold" class.
  * All other HTML characters in the text are escaped to prevent XSS.
  *
- * @param {string} text - Raw passage text, possibly containing <jesus>…</jesus> tags
+ * @param {string} text - Raw passage text, possibly containing <span class="jesus">…</span> tags
  * @param {boolean} highlight - Whether to render Jesus' words as bold
  * @returns {string} Safe HTML string ready for v-html binding
  */
 export function renderJesusText(text, highlight) {
-  const parts = text.split(/(<jesus>|<\/jesus>)/i)
+  const parts = text.split(/(<span class="jesus">|<\/span>)/)
   let inJesus = false
   let result = ''
   for (const part of parts) {
-    if (part.toLowerCase() === '<jesus>') {
+    if (part === '<span class="jesus">') {
       inJesus = true
-      if (highlight) result += '<span class="jesus">'
-    } else if (part.toLowerCase() === '</jesus>') {
-      if (highlight && inJesus) result += '</span>'
+      result += highlight ? '<span class="jesus font-bold">' : '<span class="jesus">'
+    } else if (part === '</span>' && inJesus) {
+      result += '</span>'
       inJesus = false
     } else {
       result += escapeHtml(part)
