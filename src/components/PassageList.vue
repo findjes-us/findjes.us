@@ -19,6 +19,9 @@
       </p>
     </div>
     <div v-else>
+      <p class="text-xs text-gray-400 mb-4">
+        {{ passages.length }} passage{{ passages.length !== 1 ? 's' : '' }} found
+      </p>
       <div class="space-y-6">
         <section
           v-for="group in groupedPassages"

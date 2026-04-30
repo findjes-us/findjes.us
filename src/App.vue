@@ -58,27 +58,19 @@
       <!-- Home page -->
       <template v-else>
         <div class="space-y-4">
-          <div class="sticky top-0 z-10 bg-gray-50 space-y-4 py-2 -mx-4 px-4 shadow-sm">
-            <SearchBar
-              :model-value="searchQuery"
-              @search="onSearch"
-            />
-            <FilterBar
-              v-model:book="filterBook"
-              v-model:chapter="filterChapter"
-              v-model:verse="filterVerse"
-              v-model:red-letter="redLetter"
-              :books="books"
-              :chapters="chapters"
-              :verses="verses"
-            />
-            <p
-              v-if="filteredPassages.length > 0"
-              class="text-xs text-gray-400"
-            >
-              {{ filteredPassages.length }} passage{{ filteredPassages.length !== 1 ? 's' : '' }} found
-            </p>
-          </div>
+          <SearchBar
+            :model-value="searchQuery"
+            @search="onSearch"
+          />
+          <FilterBar
+            v-model:book="filterBook"
+            v-model:chapter="filterChapter"
+            v-model:verse="filterVerse"
+            v-model:red-letter="redLetter"
+            :books="books"
+            :chapters="chapters"
+            :verses="verses"
+          />
           <PassageList
             :passages="filteredPassages"
             :red-letter="redLetter"
