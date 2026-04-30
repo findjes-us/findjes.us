@@ -1,6 +1,6 @@
 <template>
   <div class="relative w-full flex gap-2">
-    <div class="flex flex-1 items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500">
+    <div class="flex flex-1 items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-violet-300">
       <IconSearch class="w-5 h-5 text-gray-400 flex-shrink-0" />
       <label
         for="passage-search"
@@ -24,7 +24,7 @@
       </button>
     </div>
     <button
-      class="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors"
+      class="flex items-center gap-1.5 bg-violet-300 hover:bg-violet-400 text-black text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-colors"
       @click="submit"
     >
       <IconSearch class="w-4 h-4" />
