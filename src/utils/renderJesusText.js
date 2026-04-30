@@ -15,7 +15,7 @@ export function renderJesusText(text, highlight) {
   for (const part of parts) {
     if (part === '<span class="jesus">') {
       inJesus = true
-      result += highlight ? '<span class="jesus font-bold">' : '<span class="jesus">'
+      result += highlight ? '<span class="jesus font-bold text-jesuspurple-500">' : '<span class="jesus">'
     } else if (part === '</span>' && inJesus) {
       result += '</span>'
       inJesus = false
