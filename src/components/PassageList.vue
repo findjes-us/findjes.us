@@ -11,7 +11,7 @@
       <p class="text-sm mt-1">
         Try adjusting your filters or
         <button
-          class="text-indigo-600 underline hover:text-indigo-800"
+          class="text-jesuspurple-600 underline hover:text-jesuspurple-800"
           @click="emit('show-tips')"
         >
           tips for using wildcards
@@ -38,7 +38,7 @@
               >
                 <a
                   :href="`#${anchorId(group.book, group.chapter, v.verse)}`"
-                  class="text-indigo-500 hover:text-indigo-700"
+                  class="text-jesuspurple-500 hover:text-jesuspurple-700"
                 >{{ v.verse }}</a>
               </sup><span v-html="renderText(v.text)" />
             </template>

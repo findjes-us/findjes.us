@@ -2,7 +2,7 @@
   <div class="flex flex-wrap gap-3 items-center">
     <div class="flex items-center gap-1">
       <IconBook
-        class="w-4 h-4 text-indigo-500"
+        class="w-4 h-4 text-jesuspurple-500"
         aria-hidden="true"
       />
       <label
@@ -12,7 +12,7 @@
       <select
         id="filter-book"
         :value="book"
-        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-jesuspurple-500 outline-none"
         @change="emit('update:book', $event.target.value); emit('update:chapter', ''); emit('update:verse', '')"
       >
         <option value="">
@@ -30,7 +30,7 @@
 
     <div class="flex items-center gap-1">
       <IconBookmark
-        class="w-4 h-4 text-indigo-500"
+        class="w-4 h-4 text-jesuspurple-500"
         aria-hidden="true"
       />
       <label
@@ -41,7 +41,7 @@
         id="filter-chapter"
         :value="chapter"
         :disabled="!book"
-        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
+        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-jesuspurple-500 outline-none disabled:opacity-40"
         @change="emit('update:chapter', $event.target.value); emit('update:verse', '')"
       >
         <option value="">
@@ -59,7 +59,7 @@
 
     <div class="flex items-center gap-1">
       <IconHash
-        class="w-4 h-4 text-indigo-500"
+        class="w-4 h-4 text-jesuspurple-500"
         aria-hidden="true"
       />
       <label
@@ -70,7 +70,7 @@
         id="filter-verse"
         :value="verse"
         :disabled="!chapter"
-        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-40"
+        class="border border-gray-300 rounded-md text-sm px-2 py-1.5 bg-white focus:ring-2 focus:ring-jesuspurple-500 outline-none disabled:opacity-40"
         @change="emit('update:verse', $event.target.value)"
       >
         <option value="">
@@ -88,7 +88,7 @@
 
     <button
       v-if="book || chapter || verse"
-      class="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+      class="text-xs text-jesuspurple-600 hover:underline flex items-center gap-1"
       @click="resetFilters"
     >
       <IconX class="w-3 h-3" />
@@ -99,7 +99,7 @@
       class="flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md border transition-colors"
       :class="redLetter
         ? 'bg-red-600 border-red-600 text-white hover:bg-red-700'
-        : 'bg-white border-gray-300 text-gray-600 hover:border-indigo-400 hover:text-indigo-600'"
+        : 'bg-white border-gray-300 text-gray-600 hover:border-jesuspurple-400 hover:text-jesuspurple-600'"
       :aria-pressed="redLetter"
       @click="emit('update:redLetter', !redLetter)"
     >

@@ -1,6 +1,6 @@
 <template>
   <section class="max-w-2xl mx-auto py-10 px-4 space-y-6 text-gray-800">
-    <h1 class="text-3xl font-bold text-indigo-700 flex items-center gap-3">
+    <h1 class="text-3xl font-bold text-jesuspurple-700 flex items-center gap-3">
       <IconInfoCircle class="w-8 h-8" />
       About FindJes.us
     </h1>
@@ -17,7 +17,7 @@
         href="https://worldenglish.bible"
         target="_blank"
         rel="noopener"
-        class="text-indigo-600 underline hover:text-indigo-800"
+        class="text-jesuspurple-600 underline hover:text-jesuspurple-800"
       >worldenglish.bible</a>.
     </p>
     <p class="text-base leading-relaxed">
