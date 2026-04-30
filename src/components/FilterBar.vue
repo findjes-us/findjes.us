@@ -95,22 +95,47 @@
       Clear filters
     </button>
 
-    <button
-      class="flex items-center gap-1.5 text-xs px-2 py-1.5 rounded-md border transition-colors"
-      :class="redLetter
-        ? 'bg-red-600 border-red-600 text-white hover:bg-red-700'
-        : 'bg-white border-gray-300 text-gray-600 hover:border-jesuspurple-400 hover:text-jesuspurple-600'"
-      :aria-pressed="redLetter"
-      @click="emit('update:redLetter', !redLetter)"
-    >
-      <IconBible class="w-3.5 h-3.5" />
+    <label class="flex items-center gap-2 cursor-pointer select-none text-xs text-gray-600">
+      <IconBible
+        class="w-3.5 h-3.5 text-jesuspurple-500"
+        aria-hidden="true"
+      />
       Highlight Jesus' Words
-    </button>
+      <button
+        type="button"
+        role="switch"
+        :aria-checked="redLetter"
+        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-jesuspurple-500 focus:ring-offset-2"
+        :class="redLetter ? 'bg-jesuspurple-500' : 'bg-gray-200'"
+        @click="emit('update:redLetter', !redLetter)"
+      >
+        <span class="sr-only">Highlight Jesus' Words</span>
+        <span
+          class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+          :class="redLetter ? 'translate-x-5' : 'translate-x-0'"
+        >
+          <span
+            class="absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+            :class="redLetter ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in'"
+            aria-hidden="true"
+          >
+            <IconX class="h-3 w-3 text-gray-400" />
+          </span>
+          <span
+            class="absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+            :class="redLetter ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out'"
+            aria-hidden="true"
+          >
+            <IconCheck class="h-3 w-3 text-jesuspurple-500" />
+          </span>
+        </span>
+      </button>
+    </label>
   </div>
 </template>
 
 <script setup>
-import { IconBook, IconBookmark, IconHash, IconX, IconBible } from '@tabler/icons-vue'
+import { IconBook, IconBookmark, IconHash, IconX, IconCheck, IconBible } from '@tabler/icons-vue'
 
 defineProps({
   book: { type: String, default: '' },
