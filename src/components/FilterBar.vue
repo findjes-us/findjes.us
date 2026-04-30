@@ -95,21 +95,24 @@
       Clear filters
     </button>
 
-    <label class="flex items-center gap-2 cursor-pointer select-none text-xs text-gray-600">
+    <div class="flex items-center gap-2">
       <IconBible
         class="w-3.5 h-3.5 text-jesuspurple-500"
         aria-hidden="true"
       />
-      Highlight Jesus' Words
+      <span
+        id="red-letter-label"
+        class="text-xs text-gray-600 cursor-default select-none"
+      >Highlight Jesus' Words</span>
       <button
         type="button"
         role="switch"
         :aria-checked="redLetter"
+        aria-labelledby="red-letter-label"
         class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-jesuspurple-500 focus:ring-offset-2"
         :class="redLetter ? 'bg-jesuspurple-500' : 'bg-gray-200'"
         @click="emit('update:redLetter', !redLetter)"
       >
-        <span class="sr-only">Highlight Jesus' Words</span>
         <span
           class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
           :class="redLetter ? 'translate-x-5' : 'translate-x-0'"
@@ -130,7 +133,7 @@
           </span>
         </span>
       </button>
-    </label>
+    </div>
   </div>
 </template>
 
