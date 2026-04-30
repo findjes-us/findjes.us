@@ -1,13 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
     <!-- Header -->
-    <header class="bg-indigo-700 text-white shadow-md">
+    <header class="bg-violet-300 text-white shadow-md">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <button
           class="flex items-center gap-2 text-xl font-bold hover:opacity-90"
           @click="navigateTo('home')"
         >
-          <IconCross class="w-6 h-6" />
+          <img src="../findjesus-favicon.svg" width="32" height="32" />
           FindJes.us
         </button>
         <nav class="flex flex-nowrap items-center gap-4">
