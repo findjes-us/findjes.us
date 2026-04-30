@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        indigo: {
+        jesuspurple: {
           50: '#382267',
           400: '#382267',
           500: '#382267',

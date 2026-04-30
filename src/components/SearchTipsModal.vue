@@ -12,7 +12,7 @@
         <IconX class="w-5 h-5" />
       </button>
       <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <IconHelp class="w-5 h-5 text-indigo-500" />
+        <IconHelp class="w-5 h-5 text-jesuspurple-500" />
         Search Tips &amp; Wildcards
       </h2>
       <div class="space-y-3 text-sm text-gray-700">
@@ -21,7 +21,7 @@
           :key="tip.symbol"
           class="flex gap-3"
         >
-          <code class="w-16 flex-shrink-0 font-mono bg-gray-100 rounded px-2 py-0.5 text-center text-indigo-700">{{ tip.symbol }}</code>
+          <code class="w-16 flex-shrink-0 font-mono bg-gray-100 rounded px-2 py-0.5 text-center text-jesuspurple-700">{{ tip.symbol }}</code>
           <span>{{ tip.description }} <em class="text-gray-500">e.g. <code class="font-mono bg-gray-100 px-1 rounded">{{ tip.example }}</code></em></span>
         </div>
         <p class="mt-4 text-gray-500 text-xs">
