@@ -25,5 +25,8 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Copy data file
+        run: cp web.json public/web.json
+
       - name: Build
         run: npm run build
