@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, watch, inject, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, inject, onMounted, onUnmounted, nextTick } from 'vue'
 import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import SearchBar from './components/SearchBar.vue'
@@ -159,40 +159,148 @@ const {
   chapters,
   verses,
   filteredPassages,
+  passageRange,
 } = usePassages(rawData)
+
+// ── URL helpers ─────────────────────────────────────────────────────────────
+
+// Convert a book name to a URL path segment (lowercase, spaces → hyphens).
+function bookToSlug(book) {
+  return book.toLowerCase().replace(/\s+/g, '-')
+}
+
+// Find the canonical book name matching a URL slug, or null if not found.
+function slugToBook(slug, bookList) {
+  return bookList.find((b) => bookToSlug(b) === slug) ?? null
+}
 
 // ── URL sync ────────────────────────────────────────────────────────────────
 
 // Guard to prevent update loops when syncing state from the URL.
 let syncing = false
 
+// Holds a pending { slug, chapter, verse } parsed from the URL path when
+// books have not yet loaded (client-side fetch path).
+let pendingBookSlug = null
+
 function updateURL() {
   if (syncing) return
+
+  // Use path-based URLs for book/chapter/verse filter navigation.
+  if (filterBook.value && !searchQuery.value && currentPage.value !== 'about') {
+    let path = '/' + bookToSlug(filterBook.value)
+    if (filterChapter.value) {
+      path += '/' + filterChapter.value
+      if (filterVerse.value) {
+        path += '/' + filterVerse.value
+      }
+    }
+    window.history.pushState({}, '', path)
+    return
+  }
+
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
-  if (filterBook.value) params.set('book', filterBook.value)
-  if (filterChapter.value) params.set('chapter', filterChapter.value)
-  if (filterVerse.value) params.set('verse', filterVerse.value)
   if (currentPage.value === 'about') params.set('page', 'about')
   const qs = params.toString()
-  window.history.pushState({}, '', qs ? `?${qs}` : window.location.pathname)
+  window.history.pushState({}, '', qs ? `?${qs}` : '/')
 }
 
 function syncStateFromURL() {
   syncing = true
   const params = new URLSearchParams(window.location.search)
+  const segments = window.location.pathname.split('/').filter(Boolean)
+
+  // Path-based book/chapter/verse route: /{book}[/{chapter}[/{verse}]]
+  // Only treat as a book path when there are no recognised query params.
+  if (segments.length > 0 && !params.has('q') && !params.has('page')) {
+    const bookSlug = segments[0]
+    const matchedBook = slugToBook(bookSlug, books.value)
+    if (matchedBook) {
+      // Books are already loaded — resolve immediately.
+      filterBook.value = matchedBook
+      filterChapter.value = segments[1] ?? ''
+      filterVerse.value = segments[2] ?? ''
+      searchQuery.value = ''
+      currentPage.value = 'home'
+      nextTick(() => { syncing = false })
+      return
+    }
+    // Books not yet loaded — stash the slug for deferred resolution.
+    pendingBookSlug = { slug: bookSlug, chapter: segments[1] ?? '', verse: segments[2] ?? '' }
+  }
+
+  // Fall back to query-string state.
   searchQuery.value = params.get('q') ?? ''
-  filterBook.value = params.get('book') ?? ''
-  filterChapter.value = params.get('chapter') ?? ''
-  filterVerse.value = params.get('verse') ?? ''
+  filterBook.value = ''
+  filterChapter.value = ''
+  filterVerse.value = ''
   currentPage.value = params.get('page') === 'about' ? 'about' : 'home'
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
   nextTick(() => { syncing = false })
 }
 
+// Once the book list is populated (async data load), resolve any pending slug
+// that was parsed from the URL before the data arrived.
+const stopPendingSlugWatch = watch(books, (newBooks) => {
+  if (newBooks.length > 0 && pendingBookSlug) {
+    const matchedBook = slugToBook(pendingBookSlug.slug, newBooks)
+    if (matchedBook) {
+      syncing = true
+      filterBook.value = matchedBook
+      filterChapter.value = pendingBookSlug.chapter
+      filterVerse.value = pendingBookSlug.verse
+      nextTick(() => { syncing = false })
+    }
+    pendingBookSlug = null
+    stopPendingSlugWatch()
+  }
+})
+
 // Sync filter-bar changes to URL immediately (they are instant UI selections).
 watch([filterBook, filterChapter, filterVerse], updateURL)
+
+// ── Document title ──────────────────────────────────────────────────────────
+
+const DEFAULT_TITLE = 'FindJes.us – Words and Works of Jesus'
+
+const pageTitle = computed(() => {
+  if (currentPage.value === 'about') return DEFAULT_TITLE
+
+  // Passage-range search (e.g. "Mark 1:15-2:3 on FindJes.us")
+  if (passageRange.value) {
+    const r = passageRange.value
+    let ref = `${r.book} ${r.startChapter}`
+    if (r.startVerseExplicit) ref += `:${r.startVerse}`
+    if (r.endChapter !== null) {
+      ref += `-${r.endChapter}`
+      if (r.startVerseExplicit) ref += `:${r.endVerse}`
+    }
+    return `${ref} on FindJes.us`
+  }
+
+  // Keyword / phrase search
+  if (searchQuery.value) {
+    return `Matches for '${searchQuery.value}' on FindJes.us`
+  }
+
+  // Book / chapter / verse filter
+  if (filterBook.value) {
+    let ref = filterBook.value
+    if (filterChapter.value) {
+      ref += ` ${filterChapter.value}`
+      if (filterVerse.value) ref += `:${filterVerse.value}`
+    }
+    return `${ref} on FindJes.us`
+  }
+
+  return DEFAULT_TITLE
+})
+
+watch(pageTitle, (title) => {
+  if (typeof document !== 'undefined') document.title = title
+}, { immediate: true })
 
 // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -203,6 +311,12 @@ function onSearch(query) {
 
 function navigateTo(page) {
   currentPage.value = page
+  if (page === 'home') {
+    filterBook.value = ''
+    filterChapter.value = ''
+    filterVerse.value = ''
+    searchQuery.value = ''
+  }
   updateURL()
 }
 
