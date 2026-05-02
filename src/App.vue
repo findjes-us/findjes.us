@@ -3,30 +3,38 @@
     <!-- Header -->
     <header class="bg-violet-300 text-jesuspurple-500 shadow-md">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        <button
+        <a
+          href="/"
           class="flex items-center gap-2 text-xl font-bold hover:opacity-90"
-          @click="navigateTo('home')"
+          @click.prevent="navigateTo('home')"
         >
-          <img src="../findjesus-favicon.svg" width="32" height="32" />
+          <img
+            src="../findjesus-favicon.svg"
+            width="32"
+            height="32"
+            alt="FindJes.us logo"
+          >
           FindJes.us
-        </button>
+        </a>
         <nav class="flex flex-nowrap items-center gap-4">
-          <button
+          <a
+            href="/"
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'home' ? 'font-semibold underline' : ''"
-            @click="navigateTo('home')"
+            @click.prevent="navigateTo('home')"
           >
             <IconBook class="w-4 h-4" />
             Passages
-          </button>
-          <button
+          </a>
+          <a
+            href="/?page=about"
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'about' ? 'font-semibold underline' : ''"
-            @click="navigateTo('about')"
+            @click.prevent="navigateTo('about')"
           >
             <IconInfoCircle class="w-4 h-4" />
             About
-          </button>
+          </a>
           <TranslateButton />
         </nav>
       </div>
@@ -115,8 +123,8 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { IconCross, IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
+import { ref, watch, inject, onMounted, onUnmounted, nextTick } from 'vue'
+import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import SearchBar from './components/SearchBar.vue'
 import FilterBar from './components/FilterBar.vue'
@@ -127,11 +135,20 @@ import TranslateButton from './components/TranslateButton.vue'
 
 const currentPage = ref('home')
 const showTips = ref(false)
-const loading = ref(true)
 const error = ref(null)
 const redLetter = ref(false)
 
 const rawData = ref({})
+
+// On the server (SSG build) and on the client after hydration, the scripture
+// data is provided via vite-ssg's initialState mechanism so no extra fetch is
+// needed.  Fall back to null when running outside of the ViteSSG context (e.g.
+// plain `vite dev`).
+const initialWebData = inject('initialWebData', null)
+const loading = ref(!initialWebData)
+if (initialWebData) {
+  rawData.value = initialWebData
+}
 
 const {
   searchQuery,
@@ -198,6 +215,9 @@ function onPopState() {
 onMounted(async () => {
   window.addEventListener('popstate', onPopState)
   syncStateFromURL()
+
+  // Skip fetch when the scripture data was already provided via SSR initialState.
+  if (!loading.value) return
 
   try {
     const res = await fetch('/web.json')
