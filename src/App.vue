@@ -227,9 +227,7 @@ function syncStateFromURL() {
       return
     }
     // Books not yet loaded — stash the slug for deferred resolution.
-    if (segments.length > 0) {
-      pendingBookSlug = { slug: bookSlug, chapter: segments[1] ?? '', verse: segments[2] ?? '' }
-    }
+    pendingBookSlug = { slug: bookSlug, chapter: segments[1] ?? '', verse: segments[2] ?? '' }
   }
 
   // Fall back to query-string state.
@@ -275,7 +273,10 @@ const pageTitle = computed(() => {
     const r = passageRange.value
     let ref = `${r.book} ${r.startChapter}`
     if (r.startVerseExplicit) ref += `:${r.startVerse}`
-    if (r.endChapter !== null) ref += `-${r.endChapter}:${r.endVerse}`
+    if (r.endChapter !== null) {
+      ref += `-${r.endChapter}`
+      if (r.startVerseExplicit) ref += `:${r.endVerse}`
+    }
     return `${ref} on FindJes.us`
   }
 
