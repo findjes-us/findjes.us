@@ -128,6 +128,7 @@ import { ref, computed, watch, inject, onMounted, onUnmounted, nextTick } from '
 import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import { parsePassageRange } from './utils/parsePassageRange.js'
+import { bookToSlug, slugToBook } from './utils/bookToSlug.js'
 import SearchBar from './components/SearchBar.vue'
 import FilterBar from './components/FilterBar.vue'
 import PassageList from './components/PassageList.vue'
@@ -163,18 +164,6 @@ const {
   filteredPassages,
   passageRange,
 } = usePassages(rawData)
-
-// ── URL helpers ─────────────────────────────────────────────────────────────
-
-// Convert a book name to a URL path segment (lowercase, spaces → hyphens).
-function bookToSlug(book) {
-  return book.toLowerCase().replace(/\s+/g, '-')
-}
-
-// Find the canonical book name matching a URL slug, or null if not found.
-function slugToBook(slug, bookList) {
-  return bookList.find((b) => bookToSlug(b) === slug) ?? null
-}
 
 // ── URL sync ────────────────────────────────────────────────────────────────
 
@@ -330,11 +319,15 @@ function onSearch(query) {
 
   // If the query is a specific chapter or verse reference (no range), navigate
   // to the path URL instead of using ?q=.
+  // endChapter === null means the reference targets a single chapter or verse
+  // rather than a range (e.g. "Matthew 5:12" vs "Matthew 5:12-6:3").
   const range = parsePassageRange(trimmed, books.value)
   if (range && range.endChapter === null) {
     searchQuery.value = ''
     filterBook.value = range.book
     filterChapter.value = String(range.startChapter)
+    // startVerseExplicit is true when the user typed an explicit verse number
+    // (e.g. "Matthew 5:12"); false when the verse defaulted to 1 (e.g. "Matthew 5").
     filterVerse.value = range.startVerseExplicit ? String(range.startVerse) : ''
     updateURL()
     return

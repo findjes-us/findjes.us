@@ -54,16 +54,13 @@
 import { computed } from 'vue'
 import { IconMoodSad } from '@tabler/icons-vue'
 import { renderJesusText } from '../utils/renderJesusText.js'
+import { bookToSlug } from '../utils/bookToSlug.js'
 
 const props = defineProps({
   passages: { type: Array, default: () => [] },
   redLetter: { type: Boolean, default: false },
 })
 const emit = defineEmits(['show-tips', 'navigate-to-verse'])
-
-function bookToSlug(book) {
-  return book.toLowerCase().replace(/\s+/g, '-')
-}
 
 function verseHref(book, chapter, verse) {
   return `/${bookToSlug(book)}/${chapter}/${verse}`
