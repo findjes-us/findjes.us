@@ -37,8 +37,9 @@
                 class="mr-0.5"
               >
                 <a
-                  :href="`#${anchorId(group.book, group.chapter, v.verse)}`"
+                  :href="verseHref(group.book, group.chapter, v.verse)"
                   class="text-jesuspurple-500 hover:text-jesuspurple-700"
+                  @click.prevent="emit('navigate-to-verse', { book: group.book, chapter: group.chapter, verse: v.verse })"
                 >{{ v.verse }}</a>
               </sup><span v-html="renderText(v.text)" />
             </template>
@@ -58,7 +59,15 @@ const props = defineProps({
   passages: { type: Array, default: () => [] },
   redLetter: { type: Boolean, default: false },
 })
-const emit = defineEmits(['show-tips'])
+const emit = defineEmits(['show-tips', 'navigate-to-verse'])
+
+function bookToSlug(book) {
+  return book.toLowerCase().replace(/\s+/g, '-')
+}
+
+function verseHref(book, chapter, verse) {
+  return `/${bookToSlug(book)}/${chapter}/${verse}`
+}
 
 function renderText(text) {
   return renderJesusText(text, props.redLetter)

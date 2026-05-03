@@ -91,6 +91,7 @@
             :passages="filteredPassages"
             :red-letter="redLetter"
             @show-tips="showTips = true"
+            @navigate-to-verse="onNavigateToVerse"
           />
         </div>
       </template>
@@ -126,6 +127,7 @@
 import { ref, computed, watch, inject, onMounted, onUnmounted, nextTick } from 'vue'
 import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
+import { parsePassageRange } from './utils/parsePassageRange.js'
 import SearchBar from './components/SearchBar.vue'
 import FilterBar from './components/FilterBar.vue'
 import PassageList from './components/PassageList.vue'
@@ -226,8 +228,13 @@ function syncStateFromURL() {
       nextTick(() => { syncing = false })
       return
     }
-    // Books not yet loaded — stash the slug for deferred resolution.
-    pendingBookSlug = { slug: bookSlug, chapter: segments[1] ?? '', verse: segments[2] ?? '' }
+    if (books.value.length > 0) {
+      // Books loaded but slug is invalid — redirect to home.
+      window.history.replaceState({}, '', '/')
+    } else {
+      // Books not yet loaded — stash the slug for deferred resolution.
+      pendingBookSlug = { slug: bookSlug, chapter: segments[1] ?? '', verse: segments[2] ?? '' }
+    }
   }
 
   // Fall back to query-string state.
@@ -252,6 +259,9 @@ const stopPendingSlugWatch = watch(books, (newBooks) => {
       filterChapter.value = pendingBookSlug.chapter
       filterVerse.value = pendingBookSlug.verse
       nextTick(() => { syncing = false })
+    } else {
+      // Invalid slug — redirect to home.
+      window.history.replaceState({}, '', '/')
     }
     pendingBookSlug = null
     stopPendingSlugWatch()
@@ -305,7 +315,43 @@ watch(pageTitle, (title) => {
 // ── Handlers ────────────────────────────────────────────────────────────────
 
 function onSearch(query) {
+  const trimmed = query.trim()
+
+  // If the query is an exact book name, navigate to the book path.
+  const exactBook = books.value.find((b) => b.toLowerCase() === trimmed.toLowerCase())
+  if (exactBook) {
+    searchQuery.value = ''
+    filterBook.value = exactBook
+    filterChapter.value = ''
+    filterVerse.value = ''
+    updateURL()
+    return
+  }
+
+  // If the query is a specific chapter or verse reference (no range), navigate
+  // to the path URL instead of using ?q=.
+  const range = parsePassageRange(trimmed, books.value)
+  if (range && range.endChapter === null) {
+    searchQuery.value = ''
+    filterBook.value = range.book
+    filterChapter.value = String(range.startChapter)
+    filterVerse.value = range.startVerseExplicit ? String(range.startVerse) : ''
+    updateURL()
+    return
+  }
+
   searchQuery.value = query
+  filterBook.value = ''
+  filterChapter.value = ''
+  filterVerse.value = ''
+  updateURL()
+}
+
+function onNavigateToVerse({ book, chapter, verse }) {
+  searchQuery.value = ''
+  filterBook.value = book
+  filterChapter.value = String(chapter)
+  filterVerse.value = String(verse)
   updateURL()
 }
 
