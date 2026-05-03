@@ -326,8 +326,9 @@ function onSearch(query) {
     searchQuery.value = ''
     filterBook.value = range.book
     filterChapter.value = String(range.startChapter)
-    // startVerseExplicit is true when the user typed an explicit verse number
-    // (e.g. "Matthew 5:12"); false when the verse defaulted to 1 (e.g. "Matthew 5").
+    // startVerseExplicit is true when the user explicitly typed a verse number
+    // (e.g. "Matthew 5:12"); false for chapter-only references (e.g. "Matthew 5")
+    // where filterVerse is left empty to show all verses in that chapter.
     filterVerse.value = range.startVerseExplicit ? String(range.startVerse) : ''
     updateURL()
     return
