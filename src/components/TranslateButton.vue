@@ -1,6 +1,6 @@
 <template>
   <div
-    class="text-sm hover:underline flex items-center gap-1"
+    class="hidden sm:flex text-sm hover:underline items-center gap-1"
   >
     <IconLanguage class="w-4 h-4" />
     Translate

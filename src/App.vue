@@ -14,7 +14,7 @@
             height="32"
             alt="FindJes.us logo"
           >
-          FindJes.us
+          <span class="hidden sm:inline">FindJes.us</span>
         </a>
         <nav class="flex flex-nowrap items-center gap-4">
           <a
@@ -24,7 +24,7 @@
             @click.prevent="navigateTo('home')"
           >
             <IconBook class="w-4 h-4" />
-            Passages
+            <span class="hidden sm:inline">Passages</span>
           </a>
           <a
             href="/?page=about"
@@ -33,7 +33,7 @@
             @click.prevent="navigateTo('about')"
           >
             <IconInfoCircle class="w-4 h-4" />
-            About
+            <span class="hidden sm:inline">About</span>
           </a>
           <TranslateButton />
         </nav>
