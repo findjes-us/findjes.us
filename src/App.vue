@@ -67,6 +67,9 @@
       <template v-else>
         <div class="space-y-4">
           <div class="sticky top-0 z-10 bg-gray-50 space-y-4 py-2 -mx-4 px-4 shadow-sm">
+            <h2 class="text-3xl font-bold text-jesuspurple-700 flex items-center gap-3">
+              Biblical chapters of Jesus' words and works
+            </h2>
             <SearchBar
               :model-value="searchQuery"
               @search="onSearch"
