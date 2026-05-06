@@ -119,6 +119,15 @@
         rel="noopener"
         class="underline hover:text-gray-600"
       >Open Source on GitHub</a>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-XPHBH3SWCG"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-XPHBH3SWCG');
+      </script>
     </footer>
   </div>
 </template>
