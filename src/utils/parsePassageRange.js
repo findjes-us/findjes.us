@@ -51,27 +51,26 @@ export function parsePassageRange(query, knownBooks) {
     const startChapter = parseInt(m[1], 10)
     const startVerseExplicit = Boolean(m[2])
     const startVerse = startVerseExplicit ? parseInt(m[2], 10) : 1
-    const endChapter = m[3] ? parseInt(m[3], 10) : null
-    // Per spec: if endChapter is present but endVerse is absent, endVerse = 1 (implied).
-    const endVerseExplicit = endChapter !== null ? Boolean(m[4]) : false
-    const endVerse = endChapter !== null ? (m[4] ? parseInt(m[4], 10) : 1) : null
 
-    let endChapter, endVerse
+    let endChapter, endVerse, endVerseExplicit
     if (!m[3]) {
       // No range – single chapter or single verse.
       endChapter = null
       endVerse = null
+      endVerseExplicit = false
     } else if (startVerseExplicit && !m[4]) {
       // "chapter:verse-number": the bare number after the dash is an end verse
       // within the same starting chapter (e.g. "Luke 7:1-15" → ch 7, v 1–15).
       endChapter = startChapter
       endVerse = parseInt(m[3], 10)
+      endVerseExplicit = true
     } else {
       // "chapter-chapter" or "chapter:verse-chapter:verse" or "chapter-chapter:verse"
       endChapter = parseInt(m[3], 10)
       // When no end verse is specified, use a large sentinel so that all verses
       // in the end chapter are included (e.g. "Luke 7-10" → all of ch 7–10).
       endVerse = m[4] ? parseInt(m[4], 10) : ALL_VERSES_IN_CHAPTER
+      endVerseExplicit = Boolean(m[4])
     }
 
     return { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse, endVerseExplicit }
