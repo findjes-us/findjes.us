@@ -96,6 +96,10 @@
             @show-tips="showTips = true"
             @navigate-to-verse="onNavigateToVerse"
           />
+          <BibleGatewayCard
+            v-if="bibleGatewayRef"
+            :passage-ref="bibleGatewayRef"
+          />
         </div>
       </template>
     </main>
@@ -147,6 +151,7 @@ import PassageList from './components/PassageList.vue'
 import AboutPage from './components/AboutPage.vue'
 import SearchTipsModal from './components/SearchTipsModal.vue'
 import TranslateButton from './components/TranslateButton.vue'
+import BibleGatewayCard from './components/BibleGatewayCard.vue'
 
 const currentPage = ref('home')
 const showTips = ref(false)
@@ -312,6 +317,29 @@ const pageTitle = computed(() => {
 watch(pageTitle, (title) => {
   if (typeof document !== 'undefined') document.title = title
 }, { immediate: true })
+
+// ── BibleGateway link ────────────────────────────────────────────────────────
+
+// Build the passage reference string for BibleGateway links.
+// Returns null when there is no specific verse/chapter/range to look up.
+const bibleGatewayRef = computed(() => {
+  if (passageRange.value) {
+    const r = passageRange.value
+    let ref = `${r.book} ${r.startChapter}`
+    if (r.startVerseExplicit) ref += `:${r.startVerse}`
+    if (r.endChapter !== null) {
+      ref += `-${r.endChapter}`
+      if (r.endVerseExplicit) ref += `:${r.endVerse}`
+    }
+    return ref
+  }
+  if (filterBook.value && filterChapter.value) {
+    let ref = `${filterBook.value} ${filterChapter.value}`
+    if (filterVerse.value) ref += `:${filterVerse.value}`
+    return ref
+  }
+  return null
+})
 
 // ── Handlers ────────────────────────────────────────────────────────────────
 

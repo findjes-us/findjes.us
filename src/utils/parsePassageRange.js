@@ -48,9 +48,10 @@ export function parsePassageRange(query, knownBooks) {
     const startVerse = startVerseExplicit ? parseInt(m[2], 10) : 1
     const endChapter = m[3] ? parseInt(m[3], 10) : null
     // Per spec: if endChapter is present but endVerse is absent, endVerse = 1 (implied).
+    const endVerseExplicit = endChapter !== null ? Boolean(m[4]) : false
     const endVerse = endChapter !== null ? (m[4] ? parseInt(m[4], 10) : 1) : null
 
-    return { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse }
+    return { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse, endVerseExplicit }
   }
 
   return null
