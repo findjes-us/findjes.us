@@ -2,16 +2,21 @@
  * Parse a passage range string such as:
  *   "Matthew 17"          → startChapter=17, startVerse=1 (implied), no end
  *   "Matthew 17:5"        → startChapter=17, startVerse=5 (explicit), no end
- *   "Matthew 17-18"       → 17:1–18:1
+ *   "Matthew 17-18"       → 17:1–18:last (all verses of ch 18)
  *   "Matthew 17-18:3"     → 17:1–18:3
  *   "Matthew 17:5-18:3"   → 17:5–18:3
+ *   "Matthew 17:5-18"     → 17:5–17:18 (bare number after colon range = end verse in same chapter)
  *
  * Returns { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse }
  * or null if the string is not a recognizable passage reference.
  *
  * Rules (per spec):
- *  - If a chapter is provided without a verse, verse 1 is implied.
- *  - If endChapter is present and endVerse is absent, endVerse defaults to 1.
+ *  - If a chapter is provided without a verse, verse 1 is implied for the start.
+ *  - If the start includes an explicit verse (chapter:verse) and the end is a bare
+ *    number with no colon, the bare number is treated as an end verse within the
+ *    same starting chapter (e.g. "Luke 7:1-15" → ch 7, v 1–15).
+ *  - If the end is a chapter-only reference (no verse), all verses of that chapter
+ *    are included (endVerse is set to a large sentinel value).
  *  - If the range is non-sequential (start > end position), callers should show
  *    all passages from the start position onwards within the book.
  *
@@ -51,6 +56,24 @@ export function parsePassageRange(query, knownBooks) {
     const endVerseExplicit = endChapter !== null ? Boolean(m[4]) : false
     const endVerse = endChapter !== null ? (m[4] ? parseInt(m[4], 10) : 1) : null
 
+    let endChapter, endVerse
+    if (!m[3]) {
+      // No range – single chapter or single verse.
+      endChapter = null
+      endVerse = null
+    } else if (startVerseExplicit && !m[4]) {
+      // "chapter:verse-number": the bare number after the dash is an end verse
+      // within the same starting chapter (e.g. "Luke 7:1-15" → ch 7, v 1–15).
+      endChapter = startChapter
+      endVerse = parseInt(m[3], 10)
+    } else {
+      // "chapter-chapter" or "chapter:verse-chapter:verse" or "chapter-chapter:verse"
+      endChapter = parseInt(m[3], 10)
+      // When no end verse is specified, use a large sentinel so that all verses
+      // in the end chapter are included (e.g. "Luke 7-10" → all of ch 7–10).
+      endVerse = m[4] ? parseInt(m[4], 10) : ALL_VERSES_IN_CHAPTER
+    }
+
     return { book, startChapter, startVerse, startVerseExplicit, endChapter, endVerse, endVerseExplicit }
   }
 
@@ -60,6 +83,11 @@ export function parsePassageRange(query, knownBooks) {
 // Multiplier used to combine chapter and verse into a single comparable integer.
 // A value of 1000000 safely accommodates books with up to 999,999 verses per chapter.
 const VERSE_OFFSET_MULTIPLIER = 1000000
+
+// Sentinel used when no end verse is specified in a chapter-only range end
+// (e.g. "Luke 7-10"). No Bible chapter has anywhere near this many verses
+// (the maximum is Psalm 119 with 176 verses).
+const ALL_VERSES_IN_CHAPTER = 999
 
 /**
  * Test whether a flat passage object falls within a parsed passage range.
