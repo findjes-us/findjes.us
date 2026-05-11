@@ -37,15 +37,6 @@
       findjes-us/findjes.us on GitHub
     </a>
   </section>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XPHBH3SWCG"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-XPHBH3SWCG');
-  </script>
 </template>
 
 <script setup>
