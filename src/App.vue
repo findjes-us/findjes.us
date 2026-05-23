@@ -27,6 +27,15 @@
             <span class="hidden sm:inline">Passages</span>
           </a>
           <a
+            href="/?page=themes"
+            class="text-sm hover:underline flex items-center gap-1"
+            :class="currentPage === 'themes' ? 'font-semibold underline' : ''"
+            @click.prevent="navigateTo('themes')"
+          >
+            <IconStar class="w-4 h-4" />
+            <span class="hidden sm:inline">Top Themes</span>
+          </a>
+          <a
             href="/?page=about"
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'about' ? 'font-semibold underline' : ''"
@@ -62,6 +71,12 @@
 
       <!-- About page -->
       <AboutPage v-else-if="currentPage === 'about'" />
+      <ThemesPage
+        v-else-if="currentPage === 'themes'"
+        :topics="topicsData"
+        :loading="loadingTopics"
+        :error="topicsError"
+      />
 
       <!-- Home page -->
       <template v-else>
@@ -84,14 +99,14 @@
               :verses="verses"
             />
             <p
-              v-if="filteredPassages.length > 0"
+              v-if="displayPassages.length > 0"
               class="text-xs text-gray-400"
             >
-              {{ filteredPassages.length }} passage{{ filteredPassages.length !== 1 ? 's' : '' }} found
+              {{ displayPassages.length }} passage{{ displayPassages.length !== 1 ? 's' : '' }} found
             </p>
           </div>
           <PassageList
-            :passages="filteredPassages"
+            :passages="displayPassages"
             :red-letter="redLetter"
             @show-tips="showTips = true"
             @navigate-to-verse="onNavigateToVerse"
@@ -132,7 +147,7 @@
 
 <script setup>
 import { ref, computed, watch, inject, onMounted, onUnmounted, nextTick } from 'vue'
-import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle } from '@tabler/icons-vue'
+import { IconBook, IconInfoCircle, IconLoader, IconAlertCircle, IconStar } from '@tabler/icons-vue'
 import { usePassages } from './composables/usePassages.js'
 import { parsePassageRange } from './utils/parsePassageRange.js'
 import { bookToSlug, slugToBook } from './utils/bookToSlug.js'
@@ -140,6 +155,7 @@ import SearchBar from './components/SearchBar.vue'
 import FilterBar from './components/FilterBar.vue'
 import PassageList from './components/PassageList.vue'
 import AboutPage from './components/AboutPage.vue'
+import ThemesPage from './components/ThemesPage.vue'
 import SearchTipsModal from './components/SearchTipsModal.vue'
 import TranslateButton from './components/TranslateButton.vue'
 import BibleGatewayCard from './components/BibleGatewayCard.vue'
@@ -148,17 +164,25 @@ const currentPage = ref('home')
 const showTips = ref(false)
 const error = ref(null)
 const redLetter = ref(false)
+const selectedTopic = ref('')
 
 const rawData = ref({})
+const topicsData = ref([])
+const topicsError = ref(null)
 
 // On the server (SSG build) and on the client after hydration, the scripture
 // data is provided via vite-ssg's initialState mechanism so no extra fetch is
 // needed.  Fall back to null when running outside of the ViteSSG context (e.g.
 // plain `vite dev`).
 const initialWebData = inject('initialWebData', null)
+const initialTopicsData = inject('initialTopicsData', null)
 const loading = ref(!initialWebData)
+const loadingTopics = ref(!initialTopicsData)
 if (initialWebData) {
   rawData.value = initialWebData
+}
+if (initialTopicsData) {
+  topicsData.value = initialTopicsData
 }
 
 const {
@@ -173,6 +197,21 @@ const {
   passageRange,
 } = usePassages(rawData)
 
+const selectedTopicData = computed(() => {
+  if (!selectedTopic.value) return null
+  return topicsData.value.find((topic) => topic.topic === selectedTopic.value) ?? null
+})
+
+const selectedTopicRefs = computed(() => {
+  if (!selectedTopicData.value) return null
+  return new Set(selectedTopicData.value.verses)
+})
+
+const displayPassages = computed(() => {
+  if (!selectedTopicRefs.value) return filteredPassages.value
+  return filteredPassages.value.filter((p) => selectedTopicRefs.value.has(`${p.book} ${p.chapter}:${p.verse}`))
+})
+
 // ── URL sync ────────────────────────────────────────────────────────────────
 
 // Guard to prevent update loops when syncing state from the URL.
@@ -186,7 +225,7 @@ function updateURL() {
   if (syncing) return
 
   // Use path-based URLs for book/chapter/verse filter navigation.
-  if (filterBook.value && !searchQuery.value && currentPage.value !== 'about') {
+  if (filterBook.value && !searchQuery.value && !selectedTopic.value && currentPage.value !== 'about' && currentPage.value !== 'themes') {
     let path = '/' + bookToSlug(filterBook.value)
     if (filterChapter.value) {
       path += '/' + filterChapter.value
@@ -200,7 +239,9 @@ function updateURL() {
 
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
+  if (selectedTopic.value && currentPage.value === 'home') params.set('topic', selectedTopic.value)
   if (currentPage.value === 'about') params.set('page', 'about')
+  if (currentPage.value === 'themes') params.set('page', 'themes')
   const qs = params.toString()
   window.history.pushState({}, '', qs ? `?${qs}` : '/')
 }
@@ -212,11 +253,12 @@ function syncStateFromURL() {
 
   // Path-based book/chapter/verse route: /{book}[/{chapter}[/{verse}]]
   // Only treat as a book path when there are no recognised query params.
-  if (segments.length > 0 && !params.has('q') && !params.has('page')) {
+  if (segments.length > 0 && !params.has('q') && !params.has('page') && !params.has('topic')) {
     const bookSlug = segments[0]
     const matchedBook = slugToBook(bookSlug, books.value)
     if (matchedBook) {
       // Books are already loaded — resolve immediately.
+      selectedTopic.value = ''
       filterBook.value = matchedBook
       filterChapter.value = segments[1] ?? ''
       filterVerse.value = segments[2] ?? ''
@@ -236,10 +278,12 @@ function syncStateFromURL() {
 
   // Fall back to query-string state.
   searchQuery.value = params.get('q') ?? ''
+  selectedTopic.value = params.get('topic') ?? ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
-  currentPage.value = params.get('page') === 'about' ? 'about' : 'home'
+  const page = params.get('page')
+  currentPage.value = page === 'about' || page === 'themes' ? page : 'home'
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
   nextTick(() => { syncing = false })
@@ -266,7 +310,14 @@ const stopPendingSlugWatch = watch(books, (newBooks) => {
 })
 
 // Sync filter-bar changes to URL immediately (they are instant UI selections).
-watch([filterBook, filterChapter, filterVerse], updateURL)
+watch([filterBook, filterChapter, filterVerse, selectedTopic], () => {
+  const hasStructuredFilter = Boolean(filterBook.value || filterChapter.value || filterVerse.value)
+  if (hasStructuredFilter && selectedTopic.value) {
+    selectedTopic.value = ''
+    return
+  }
+  updateURL()
+})
 
 // ── Document title ──────────────────────────────────────────────────────────
 
@@ -274,6 +325,7 @@ const DEFAULT_TITLE = 'FindJes.us – Words and Works of Jesus'
 
 const pageTitle = computed(() => {
   if (currentPage.value === 'about') return DEFAULT_TITLE
+  if (currentPage.value === 'themes') return 'Top Themes on FindJes.us'
 
   // Passage-range search (e.g. "Mark 1:15-2:3 on FindJes.us")
   if (passageRange.value) {
@@ -290,6 +342,10 @@ const pageTitle = computed(() => {
   // Keyword / phrase search
   if (searchQuery.value) {
     return `Matches for '${searchQuery.value}' on FindJes.us`
+  }
+
+  if (selectedTopicData.value) {
+    return `Top theme '${selectedTopicData.value.topic}' on FindJes.us`
   }
 
   // Book / chapter / verse filter
@@ -341,6 +397,7 @@ function onSearch(query) {
   const exactBook = books.value.find((b) => b.toLowerCase() === trimmed.toLowerCase())
   if (exactBook) {
     searchQuery.value = ''
+    selectedTopic.value = ''
     filterBook.value = exactBook
     filterChapter.value = ''
     filterVerse.value = ''
@@ -355,6 +412,7 @@ function onSearch(query) {
   const range = parsePassageRange(trimmed, books.value)
   if (range && range.endChapter === null) {
     searchQuery.value = ''
+    selectedTopic.value = ''
     filterBook.value = range.book
     filterChapter.value = String(range.startChapter)
     // startVerseExplicit is true when the user explicitly typed a verse number
@@ -366,6 +424,7 @@ function onSearch(query) {
   }
 
   searchQuery.value = query
+  selectedTopic.value = ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
@@ -374,6 +433,7 @@ function onSearch(query) {
 
 function onNavigateToVerse({ book, chapter, verse }) {
   searchQuery.value = ''
+  selectedTopic.value = ''
   filterBook.value = book
   filterChapter.value = String(chapter)
   filterVerse.value = String(verse)
@@ -387,6 +447,7 @@ function navigateTo(page) {
     filterChapter.value = ''
     filterVerse.value = ''
     searchQuery.value = ''
+    selectedTopic.value = ''
   }
   updateURL()
 }
@@ -401,18 +462,30 @@ onMounted(async () => {
   window.addEventListener('popstate', onPopState)
   syncStateFromURL()
 
-  // Skip fetch when the scripture data was already provided via SSR initialState.
-  if (!loading.value) return
+  // Skip fetch when both datasets were already provided via SSR initialState.
+  if (!loading.value && !loadingTopics.value) return
 
   try {
-    const res = await fetch('/web.json')
-    if (!res.ok) throw new Error(`Failed to load data: ${res.statusText}`)
-    const json = await res.json()
-    rawData.value = json
+    const [webRes, topicsRes] = await Promise.all([
+      loading.value ? fetch('/web.json') : Promise.resolve(null),
+      loadingTopics.value ? fetch('/topics.json') : Promise.resolve(null),
+    ])
+    if (webRes && !webRes.ok) throw new Error(`Failed to load data: ${webRes.statusText}`)
+    if (webRes) {
+      rawData.value = await webRes.json()
+    }
+    if (topicsRes) {
+      if (topicsRes.ok) {
+        topicsData.value = await topicsRes.json()
+      } else {
+        topicsError.value = `Failed to load topics: ${topicsRes.statusText}`
+      }
+    }
   } catch (e) {
     error.value = e.message
   } finally {
     loading.value = false
+    loadingTopics.value = false
   }
 })
 
