@@ -8,7 +8,8 @@
     "build": "vite-ssg build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js",
-    "lint:fix": "eslint . --ext .vue,.js --fix"
+    "lint:fix": "eslint . --ext .vue,.js --fix",
+    "analyze": "node scripts/analyze-topics.js"
   },
   "dependencies": {
     "@tabler/icons-vue": "^3.0.0",
