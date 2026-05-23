@@ -27,7 +27,7 @@
             <span class="hidden sm:inline">Passages</span>
           </a>
           <a
-            href="/?page=themes"
+            href="/themes"
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'themes' ? 'font-semibold underline' : ''"
             @click.prevent="navigateTo('themes')"
@@ -36,7 +36,7 @@
             <span class="hidden sm:inline">Top Themes</span>
           </a>
           <a
-            href="/?page=about"
+            href="/about"
             class="text-sm hover:underline flex items-center gap-1"
             :class="currentPage === 'about' ? 'font-semibold underline' : ''"
             @click.prevent="navigateTo('about')"
@@ -224,6 +224,15 @@ let pendingBookSlug = null
 function updateURL() {
   if (syncing) return
 
+  if (currentPage.value === 'about') {
+    window.history.pushState({}, '', '/about')
+    return
+  }
+  if (currentPage.value === 'themes') {
+    window.history.pushState({}, '', '/themes')
+    return
+  }
+
   // Use path-based URLs for book/chapter/verse filter navigation.
   if (filterBook.value && !searchQuery.value && !selectedTopic.value && currentPage.value !== 'about' && currentPage.value !== 'themes') {
     let path = '/' + bookToSlug(filterBook.value)
@@ -250,6 +259,31 @@ function syncStateFromURL() {
   syncing = true
   const params = new URLSearchParams(window.location.search)
   const segments = window.location.pathname.split('/').filter(Boolean)
+  const pagePath = segments.length === 1 ? segments[0] : ''
+
+  if (pagePath === 'about' || pagePath === 'themes') {
+    searchQuery.value = ''
+    selectedTopic.value = ''
+    filterBook.value = ''
+    filterChapter.value = ''
+    filterVerse.value = ''
+    currentPage.value = pagePath
+    nextTick(() => { syncing = false })
+    return
+  }
+
+  const legacyPage = params.get('page')
+  if (segments.length === 0 && (legacyPage === 'about' || legacyPage === 'themes')) {
+    searchQuery.value = ''
+    selectedTopic.value = ''
+    filterBook.value = ''
+    filterChapter.value = ''
+    filterVerse.value = ''
+    currentPage.value = legacyPage
+    window.history.replaceState({}, '', `/${legacyPage}`)
+    nextTick(() => { syncing = false })
+    return
+  }
 
   // Path-based book/chapter/verse route: /{book}[/{chapter}[/{verse}]]
   // Only treat as a book path when there are no recognised query params.
