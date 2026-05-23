@@ -36,6 +36,9 @@ jobs:
       - name: Copy data file
         run: cp web.json public/web.json
 
+      - name: Generate topics.json
+        run: npm run analyze
+
       - name: Build
         run: npm run build
 
