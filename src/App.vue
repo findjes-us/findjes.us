@@ -248,11 +248,11 @@ function updateURL() {
 
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
-  if (selectedTopic.value && currentPage.value === 'home') params.set('topic', selectedTopic.value)
+  if (!searchQuery.value && selectedTopic.value && currentPage.value === 'home') params.set('q', selectedTopic.value)
   if (currentPage.value === 'about') params.set('page', 'about')
   if (currentPage.value === 'themes') params.set('page', 'themes')
   const qs = params.toString()
-  window.history.pushState({}, '', qs ? `?${qs}` : '/')
+  window.history.pushState({}, '', qs ? `/?${qs}` : '/')
 }
 
 function syncStateFromURL() {
@@ -311,13 +311,19 @@ function syncStateFromURL() {
   }
 
   // Fall back to query-string state.
-  searchQuery.value = params.get('q') ?? ''
-  selectedTopic.value = params.get('topic') ?? ''
+  const searchOrTopic = params.get('q') ?? params.get('topic') ?? ''
+  searchQuery.value = searchOrTopic
+  selectedTopic.value = ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
   const page = params.get('page')
   currentPage.value = page === 'about' || page === 'themes' ? page : 'home'
+  if (!params.has('q') && params.has('topic') && currentPage.value === 'home') {
+    const normalized = new URLSearchParams()
+    normalized.set('q', searchOrTopic)
+    window.history.replaceState({}, '', `/?${normalized.toString()}`)
+  }
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
   nextTick(() => { syncing = false })

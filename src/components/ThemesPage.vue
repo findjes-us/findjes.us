@@ -30,7 +30,7 @@
       <a
         v-for="item in topics"
         :key="item.topic"
-        :href="`/?topic=${encodeURIComponent(item.topic)}`"
+        :href="`/?q=${encodeURIComponent(item.topic)}`"
         class="text-jesuspurple-700 hover:underline"
         :style="{ fontSize: `${fontSizeRem(item.count)}rem`, lineHeight: 1.15 }"
         :title="`${item.topic} (${item.count})`"
