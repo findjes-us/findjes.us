@@ -76,6 +76,7 @@
         :topics="topicsData"
         :loading="loadingTopics"
         :error="topicsError"
+        @select-topic="onSelectTopic"
       />
 
       <!-- Home page -->
@@ -248,11 +249,10 @@ function updateURL() {
 
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
-  if (selectedTopic.value && currentPage.value === 'home') params.set('topic', selectedTopic.value)
   if (currentPage.value === 'about') params.set('page', 'about')
   if (currentPage.value === 'themes') params.set('page', 'themes')
   const qs = params.toString()
-  window.history.pushState({}, '', qs ? `?${qs}` : '/')
+  window.history.pushState({}, '', qs ? `/?${qs}` : '/')
 }
 
 function syncStateFromURL() {
@@ -268,6 +268,12 @@ function syncStateFromURL() {
     filterChapter.value = ''
     filterVerse.value = ''
     currentPage.value = pagePath
+    if (params.has('topic')) {
+      const normalized = new URLSearchParams(params)
+      normalized.delete('topic')
+      const qs = normalized.toString()
+      window.history.replaceState({}, '', qs ? `/${pagePath}?${qs}` : `/${pagePath}`)
+    }
     nextTick(() => { syncing = false })
     return
   }
@@ -287,7 +293,7 @@ function syncStateFromURL() {
 
   // Path-based book/chapter/verse route: /{book}[/{chapter}[/{verse}]]
   // Only treat as a book path when there are no recognised query params.
-  if (segments.length > 0 && !params.has('q') && !params.has('page') && !params.has('topic')) {
+  if (segments.length > 0 && !params.has('q') && !params.has('page')) {
     const bookSlug = segments[0]
     const matchedBook = slugToBook(bookSlug, books.value)
     if (matchedBook) {
@@ -311,13 +317,22 @@ function syncStateFromURL() {
   }
 
   // Fall back to query-string state.
-  searchQuery.value = params.get('q') ?? ''
-  selectedTopic.value = params.get('topic') ?? ''
+  const query = params.get('q')
+  const legacyTopic = params.get('topic')
+  searchQuery.value = query ?? legacyTopic ?? ''
+  selectedTopic.value = ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
   const page = params.get('page')
   currentPage.value = page === 'about' || page === 'themes' ? page : 'home'
+  if (legacyTopic && currentPage.value === 'home') {
+    const normalized = new URLSearchParams(params)
+    if (!query) normalized.set('q', legacyTopic)
+    normalized.delete('topic')
+    const qs = normalized.toString()
+    window.history.replaceState({}, '', qs ? `/?${qs}` : '/')
+  }
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
   nextTick(() => { syncing = false })
@@ -471,6 +486,16 @@ function onNavigateToVerse({ book, chapter, verse }) {
   filterBook.value = book
   filterChapter.value = String(chapter)
   filterVerse.value = String(verse)
+  updateURL()
+}
+
+function onSelectTopic(topic) {
+  currentPage.value = 'home'
+  searchQuery.value = topic
+  selectedTopic.value = ''
+  filterBook.value = ''
+  filterChapter.value = ''
+  filterVerse.value = ''
   updateURL()
 }
 

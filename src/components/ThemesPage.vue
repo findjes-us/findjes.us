@@ -30,10 +30,11 @@
       <a
         v-for="item in topics"
         :key="item.topic"
-        :href="`/?topic=${encodeURIComponent(item.topic)}`"
+        :href="`/?q=${encodeURIComponent(item.topic)}`"
         class="text-jesuspurple-700 hover:underline"
         :style="{ fontSize: `${fontSizeRem(item.count)}rem`, lineHeight: 1.15 }"
         :title="`${item.topic} (${item.count})`"
+        @click="onTopicClick($event, item.topic)"
       >
         {{ item.topic }}
       </a>
@@ -60,6 +61,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['select-topic'])
+
 const minCount = computed(() => {
   if (props.topics.length === 0) return 1
   return Math.min(...props.topics.map((t) => t.count))
@@ -74,5 +77,13 @@ function fontSizeRem(count) {
   if (maxCount.value <= minCount.value) return 1
   const ratio = (count - minCount.value) / (maxCount.value - minCount.value)
   return 1 + (ratio * 7)
+}
+
+function onTopicClick(event, topic) {
+  if (event.defaultPrevented) return
+  if (event.button !== 0) return
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  emit('select-topic', topic)
 }
 </script>
