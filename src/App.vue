@@ -258,6 +258,7 @@ function syncStateFromURL() {
     const matchedBook = slugToBook(bookSlug, books.value)
     if (matchedBook) {
       // Books are already loaded — resolve immediately.
+      selectedTopic.value = ''
       filterBook.value = matchedBook
       filterChapter.value = segments[1] ?? ''
       filterVerse.value = segments[2] ?? ''
@@ -309,11 +310,13 @@ const stopPendingSlugWatch = watch(books, (newBooks) => {
 })
 
 // Sync filter-bar changes to URL immediately (they are instant UI selections).
-watch([filterBook, filterChapter, filterVerse, selectedTopic], updateURL)
-watch([filterBook, filterChapter, filterVerse], () => {
-  if (filterBook.value || filterChapter.value || filterVerse.value) {
+watch([filterBook, filterChapter, filterVerse, selectedTopic], () => {
+  const hasStructuredFilter = Boolean(filterBook.value || filterChapter.value || filterVerse.value)
+  if (hasStructuredFilter && selectedTopic.value) {
     selectedTopic.value = ''
+    return
   }
+  updateURL()
 })
 
 // ── Document title ──────────────────────────────────────────────────────────
@@ -471,10 +474,12 @@ onMounted(async () => {
     if (webRes) {
       rawData.value = await webRes.json()
     }
-    if (topicsRes && topicsRes.ok) {
-      topicsData.value = await topicsRes.json()
-    } else if (topicsRes && !topicsRes.ok) {
-      topicsError.value = `Failed to load topics: ${topicsRes.statusText}`
+    if (topicsRes) {
+      if (topicsRes.ok) {
+        topicsData.value = await topicsRes.json()
+      } else {
+        topicsError.value = `Failed to load topics: ${topicsRes.statusText}`
+      }
     }
   } catch (e) {
     error.value = e.message
