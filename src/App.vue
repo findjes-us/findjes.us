@@ -249,7 +249,6 @@ function updateURL() {
 
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
-  if (selectedTopic.value && currentPage.value === 'home') params.set('topic', selectedTopic.value)
   if (currentPage.value === 'about') params.set('page', 'about')
   if (currentPage.value === 'themes') params.set('page', 'themes')
   const qs = params.toString()
@@ -312,13 +311,21 @@ function syncStateFromURL() {
   }
 
   // Fall back to query-string state.
-  searchQuery.value = params.get('q') ?? ''
-  selectedTopic.value = params.get('topic') ?? ''
+  const query = params.get('q')
+  const legacyTopic = params.get('topic')
+  searchQuery.value = query ?? legacyTopic ?? ''
+  selectedTopic.value = ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
   const page = params.get('page')
   currentPage.value = page === 'about' || page === 'themes' ? page : 'home'
+  if (!query && legacyTopic && currentPage.value === 'home') {
+    const normalized = new URLSearchParams(params)
+    normalized.delete('topic')
+    normalized.set('q', legacyTopic)
+    window.history.replaceState({}, '', `/?${normalized.toString()}`)
+  }
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
   nextTick(() => { syncing = false })
@@ -477,8 +484,8 @@ function onNavigateToVerse({ book, chapter, verse }) {
 
 function onSelectTopic(topic) {
   currentPage.value = 'home'
-  searchQuery.value = ''
-  selectedTopic.value = topic
+  searchQuery.value = topic
+  selectedTopic.value = ''
   filterBook.value = ''
   filterChapter.value = ''
   filterVerse.value = ''
