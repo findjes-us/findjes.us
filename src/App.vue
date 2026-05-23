@@ -248,7 +248,6 @@ function updateURL() {
 
   const params = new URLSearchParams()
   if (searchQuery.value) params.set('q', searchQuery.value)
-  if (!searchQuery.value && selectedTopic.value && currentPage.value === 'home') params.set('q', selectedTopic.value)
   if (currentPage.value === 'about') params.set('page', 'about')
   if (currentPage.value === 'themes') params.set('page', 'themes')
   const qs = params.toString()
