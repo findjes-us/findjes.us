@@ -268,6 +268,12 @@ function syncStateFromURL() {
     filterChapter.value = ''
     filterVerse.value = ''
     currentPage.value = pagePath
+    if (params.has('topic')) {
+      const normalized = new URLSearchParams(params)
+      normalized.delete('topic')
+      const qs = normalized.toString()
+      window.history.replaceState({}, '', qs ? `/${pagePath}?${qs}` : `/${pagePath}`)
+    }
     nextTick(() => { syncing = false })
     return
   }
@@ -287,7 +293,7 @@ function syncStateFromURL() {
 
   // Path-based book/chapter/verse route: /{book}[/{chapter}[/{verse}]]
   // Only treat as a book path when there are no recognised query params.
-  if (segments.length > 0 && !params.has('q') && !params.has('page') && !params.has('topic')) {
+  if (segments.length > 0 && !params.has('q') && !params.has('page')) {
     const bookSlug = segments[0]
     const matchedBook = slugToBook(bookSlug, books.value)
     if (matchedBook) {
@@ -320,11 +326,12 @@ function syncStateFromURL() {
   filterVerse.value = ''
   const page = params.get('page')
   currentPage.value = page === 'about' || page === 'themes' ? page : 'home'
-  if (!query && legacyTopic && currentPage.value === 'home') {
+  if (legacyTopic && currentPage.value === 'home') {
     const normalized = new URLSearchParams(params)
+    if (!query) normalized.set('q', legacyTopic)
     normalized.delete('topic')
-    normalized.set('q', legacyTopic)
-    window.history.replaceState({}, '', `/?${normalized.toString()}`)
+    const qs = normalized.toString()
+    window.history.replaceState({}, '', qs ? `/?${qs}` : '/')
   }
   // Allow watchers triggered by the above assignments to fire before we clear
   // the guard, so they don't call updateURL while we're loading from the URL.
