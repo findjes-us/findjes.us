@@ -76,6 +76,7 @@
         :topics="topicsData"
         :loading="loadingTopics"
         :error="topicsError"
+        @select-topic="onSelectTopic"
       />
 
       <!-- Home page -->
@@ -471,6 +472,16 @@ function onNavigateToVerse({ book, chapter, verse }) {
   filterBook.value = book
   filterChapter.value = String(chapter)
   filterVerse.value = String(verse)
+  updateURL()
+}
+
+function onSelectTopic(topic) {
+  currentPage.value = 'home'
+  searchQuery.value = ''
+  selectedTopic.value = topic
+  filterBook.value = ''
+  filterChapter.value = ''
+  filterVerse.value = ''
   updateURL()
 }
 
