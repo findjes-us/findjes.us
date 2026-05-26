@@ -2,10 +2,10 @@
   <div class="min-h-screen bg-gray-50 text-gray-900">
     <!-- Header -->
     <header class="bg-violet-300 text-jesuspurple-500 shadow-md">
-      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
         <a
           href="/"
-          class="flex items-center gap-2 text-xl font-bold hover:opacity-90"
+          class="flex shrink-0 items-center gap-2 whitespace-nowrap text-xl font-bold hover:opacity-90"
           @click.prevent="navigateTo('home')"
         >
           <img
@@ -14,35 +14,35 @@
             height="32"
             alt="FindJes.us logo"
           >
-          <span class="hidden sm:inline">FindJes.us</span>
+          <span class="hidden md:inline">FindJes.us</span>
         </a>
-        <nav class="flex flex-nowrap items-center gap-4">
+        <nav class="flex flex-nowrap items-center gap-2 sm:gap-4">
           <a
             href="/"
-            class="text-sm hover:underline flex items-center gap-1"
+            class="text-sm hover:underline flex items-center gap-1 whitespace-nowrap"
             :class="currentPage === 'home' ? 'font-semibold underline' : ''"
             @click.prevent="navigateTo('home')"
           >
             <IconBook class="w-4 h-4" />
-            <span class="hidden sm:inline">Passages</span>
+            <span class="hidden md:inline">Passages</span>
           </a>
           <a
             href="/themes"
-            class="text-sm hover:underline flex items-center gap-1"
+            class="text-sm hover:underline flex items-center gap-1 whitespace-nowrap"
             :class="currentPage === 'themes' ? 'font-semibold underline' : ''"
             @click.prevent="navigateTo('themes')"
           >
             <IconStar class="w-4 h-4" />
-            <span class="hidden sm:inline">Top Themes</span>
+            <span class="hidden md:inline">Top Themes</span>
           </a>
           <a
             href="/about"
-            class="text-sm hover:underline flex items-center gap-1"
+            class="text-sm hover:underline flex items-center gap-1 whitespace-nowrap"
             :class="currentPage === 'about' ? 'font-semibold underline' : ''"
             @click.prevent="navigateTo('about')"
           >
             <IconInfoCircle class="w-4 h-4" />
-            <span class="hidden sm:inline">About</span>
+            <span class="hidden md:inline">About</span>
           </a>
           <TranslateButton />
         </nav>
